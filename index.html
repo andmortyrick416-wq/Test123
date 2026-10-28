@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laden of tanken?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: één kolom dashboard — bovenaan het antwoord voor vandaag, daaronder logboek, grafieken en instellingen. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --surface-2: #e9edf1;
+  --line: #d5dce3;
+  --fg: #111a22;
+  --fg-2: #4a5866;
+  --fg-3: #74828f;
+  --accent: #1f5fae;
+  --accent-ink: #ffffff;
+  --s-laden: #2a78d6;
+  --s-e95: #eb6834;
+  --s-e98: #1baf7a;
+  --good: #0f7a3d;
+  --good-bg: #e2f3e8;
+  --bad: #b3261e;
+  --bad-bg: #fbe5e3;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1418; --surface: #182027; --surface-2: #212b34; --line: #2f3b46;
+    --fg: #eef2f5; --fg-2: #b4c0cb; --fg-3: #8593a0;
+    --accent: #6aa6ee; --accent-ink: #0b1622;
+    --s-laden: #3987e5; --s-e95: #d95926; --s-e98: #199e70;
+    --good: #5fd18f; --good-bg: #13301f; --bad: #ff8a80; --bad-bg: #3a1714;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1418; --surface: #182027; --surface-2: #212b34; --line: #2f3b46;
+  --fg: #eef2f5; --fg-2: #b4c0cb; --fg-3: #8593a0;
+  --accent: #6aa6ee; --accent-ink: #0b1622;
+  --s-laden: #3987e5; --s-e95: #d95926; --s-e98: #199e70;
+  --good: #5fd18f; --good-bg: #13301f; --bad: #ff8a80; --bad-bg: #3a1714;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 15px/1.5 var(--font-body);
+}
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+h2 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1rem; font-weight: 500; }
+p { margin: 0; }
+.num, .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); font-weight: 600; }
+.muted { color: var(--fg-2); }
+.small { font-size: 0.85rem; }
+
+header.top { display: grid; gap: 10px; }
+header.top .car { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--fg-2); font-size: 0.9rem; }
+header.top .car span::before { content: "·"; margin-right: 14px; color: var(--fg-3); }
+header.top .car span:first-child::before { content: none; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 18px; min-width: 0; }
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+
+/* Verdict */
+.verdict { display: grid; gap: 14px; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 0.92rem; width: fit-content; }
+.pill.good { background: var(--good-bg); color: var(--good); }
+.pill.bad { background: var(--bad-bg); color: var(--bad); }
+.pill svg { width: 16px; height: 16px; flex: none; }
+.verdict-line { font-family: var(--font-display); font-size: clamp(1.25rem, 3.2vw, 1.7rem); font-weight: 500; line-height: 1.25; max-width: 40ch; }
+.verdict-line strong { font-weight: 700; }
+
+/* Prijsbord */
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.price { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 6px; background: var(--surface-2); }
+.price .head { display: flex; align-items: center; gap: 10px; }
+.fuel-tag { width: 34px; height: 34px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; font: 600 0.72rem var(--font-data); flex: none; }
+.plug-tag { width: 34px; height: 34px; border-radius: 6px; border: 2px solid currentColor; display: grid; place-items: center; flex: none; }
+.plug-tag svg { width: 18px; height: 18px; }
+.price .val { font: 500 1.6rem var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.price .val small { font-size: 0.8rem; color: var(--fg-3); margin-left: 4px; letter-spacing: 0; }
+.price .src { font-size: 0.78rem; color: var(--fg-3); }
+
+/* Km-schuif */
+.km-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; }
+.km-row label { font-weight: 600; }
+.km-out { font: 500 1.2rem var(--font-data); }
+input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+
+/* Opties */
+.options { display: grid; gap: 10px; }
+.opt { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 6px 16px; align-items: center; }
+.opt .name { display: flex; align-items: center; gap: 8px; font-weight: 500; min-width: 0; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.opt .bar { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; display: flex; gap: 2px; }
+.opt .bar i { display: block; height: 100%; }
+.opt .bar i:last-child { border-radius: 0 4px 4px 0; }
+.opt .cost { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; min-width: 92px; }
+.opt .cost b { font-weight: 500; font-size: 1.05rem; }
+.opt .cost div { font-size: 0.75rem; color: var(--fg-3); }
+.opt .sub { grid-column: 1 / -1; font-size: 0.8rem; color: var(--fg-3); margin-top: -4px; }
+@media (max-width: 560px) {
+  .opt { grid-template-columns: 1fr auto; }
+  .opt .bar { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Tegels */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 4px; align-content: start; }
+.tile .v { font: 500 1.45rem var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tile .v.good { color: var(--good); }
+.tile .v.bad { color: var(--bad); }
+.tile .d { font-size: 0.8rem; color: var(--fg-3); }
+
+/* Formulieren */
+form.entry, .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 0.8rem; color: var(--fg-2); font-weight: 500; }
+.field input, .field select {
+  font: 0.95rem var(--font-data); font-variant-numeric: tabular-nums;
+  padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--fg); width: 100%; min-width: 0;
+}
+.field .hint { font-size: 0.74rem; color: var(--fg-3); }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button {
+  font: 600 0.9rem var(--font-body); border-radius: 8px; padding: 10px 14px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+}
+button.ghost { background: transparent; color: var(--accent); }
+button.link { background: none; border: none; color: var(--fg-3); padding: 4px 6px; font-weight: 500; }
+button.link:hover { color: var(--bad); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.notice { font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); color: var(--fg-2); }
+.notice b { color: var(--fg); }
+
+/* Grafieken */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.chart { display: grid; gap: 8px; min-width: 0; position: relative; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--fg-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart svg text { fill: var(--fg-3); font: 11px var(--font-data); }
+.chart .grid line { stroke: var(--line); stroke-width: 1; }
+.chart .zero { stroke: var(--fg-3); stroke-width: 1; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--fg); color: var(--bg);
+  font: 0.78rem/1.4 var(--font-data); padding: 8px 10px; border-radius: 6px; white-space: nowrap; z-index: 5;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+.tip .row { display: flex; align-items: center; gap: 6px; }
+
+/* Tabel */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 640px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); font-weight: 600; }
+th:first-child, td:first-child { text-align: left; }
+td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+td.good { color: var(--good); }
+td.bad { color: var(--bad); }
+tr.example td { color: var(--fg-3); }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 14px; }
+footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-width: 75ch; }
+@media (prefers-reduced-motion: no-preference) {
+  .opt .bar i { transition: width 0.35s ease; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="label">Haarlem · openbaar laden vs. tanken</span>
+    <h1>Laden of tanken?</h1>
+    <div class="car"><span>Cupra Formentor VZ e-Hybrid 245 pk</span><span id="carSummary"></span></div>
+  </header>
+
+  <!-- VANDAAG -->
+  <section class="panel" aria-labelledby="h-today">
+    <div class="section-head">
+      <h2 id="h-today">Vandaag</h2>
+      <span class="small muted" id="todayDate"></span>
+    </div>
+
+    <div class="verdict">
+      <span class="pill" id="verdictPill"></span>
+      <p class="verdict-line" id="verdictLine"></p>
+    </div>
+
+    <div class="board">
+      <div class="price">
+        <div class="head"><span class="plug-tag" style="color:var(--s-laden)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span class="label">Laadpaal</span></div>
+        <div class="val" id="pKwh"></div>
+        <div class="src" id="pKwhSrc"></div>
+      </div>
+      <div class="price">
+        <div class="head"><span class="fuel-tag" style="color:var(--s-e95)">E10</span><span class="label">Euro95</span></div>
+        <div class="val" id="p95"></div>
+        <div class="src" id="p95Src"></div>
+      </div>
+      <div class="price">
+        <div class="head"><span class="fuel-tag" style="color:var(--s-e98)">E5</span><span class="label">Euro98</span></div>
+        <div class="val" id="p98"></div>
+        <div class="src" id="p98Src"></div>
+      </div>
+    </div>
+
+    <div class="km-row">
+      <label for="kmToday">Kilometers vandaag</label>
+      <span class="km-out" id="kmTodayOut"></span>
+      <input type="range" id="kmToday" min="5" max="200" step="5">
+    </div>
+
+    <div class="options" id="options"></div>
+    <p class="small muted" id="perKm"></p>
+  </section>
+
+  <!-- LOGBOEK -->
+  <section class="panel" aria-labelledby="h-log">
+    <div class="section-head">
+      <h2 id="h-log">Logboek &amp; besparing</h2>
+      <span class="small muted">Vul na elke laadbeurt de dag in</span>
+    </div>
+
+    <div class="notice" id="exampleNotice" hidden><b>Voorbeelddata.</b> Hieronder staan 14 verzonnen dagen zodat je ziet hoe het werkt. Zodra je je eerste eigen dag toevoegt, verdwijnen ze.</div>
+
+    <form class="entry" id="entryForm">
+      <div class="field"><label for="fDate">Datum</label><input type="date" id="fDate" required></div>
+      <div class="field"><label for="fKm">Gereden km</label><input type="number" id="fKm" min="0" step="1" required placeholder="42"></div>
+      <div class="field"><label for="fKwh">Geladen kWh</label><input type="number" id="fKwh" min="0" step="0.01" required placeholder="10.5"></div>
+      <div class="field"><label for="fTarief">€ per kWh</label><input type="number" id="fTarief" min="0" step="0.001" required></div>
+      <div class="field"><label for="fStart">Starttarief €</label><input type="number" id="fStart" min="0" step="0.01"></div>
+      <div class="field"><label for="f95">Euro95 €/l</label><input type="number" id="f95" min="0" step="0.001" required></div>
+      <div class="field"><label for="f98">Euro98 €/l</label><input type="number" id="f98" min="0" step="0.001" required></div>
+      <div class="field"><label for="fWho">Wie</label><select id="fWho"><option>Ik</option><option>Partner</option><option>Samen</option></select></div>
+      <div class="field"><button type="submit">Dag opslaan</button></div>
+    </form>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="charts">
+      <div class="chart" id="chartDaily">
+        <h3>Kosten per dag</h3>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--s-laden)"></i>Met laden (+ rest benzine)</span>
+          <span><i class="swatch" style="background:var(--s-e95)"></i>Alleen Euro95</span>
+          <span><i class="swatch" style="background:var(--s-e98)"></i>Alleen Euro98</span>
+        </div>
+        <div class="svg-host"></div>
+      </div>
+      <div class="chart" id="chartCum">
+        <h3>Opgebouwde besparing door laden</h3>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--s-e95)"></i>t.o.v. Euro95</span>
+          <span><i class="swatch" style="background:var(--s-e98)"></i>t.o.v. Euro98</span>
+        </div>
+        <div class="svg-host"></div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datum</th><th>Wie</th><th>Km</th><th>kWh</th><th>Elektr. km</th><th>Kosten laden</th><th>Met laden*</th><th>Alleen E95</th><th>Alleen E98</th><th>Bespaard vs E95</th><th>Bespaard vs E98</th><th></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="small muted">* Met laden = laadkosten + benzine (Euro95) voor de kilometers die je verder reed dan de accu toeliet. In de kolom "Bespaard vs E98" is die rest met Euro98 gerekend.</p>
+  </section>
+
+  <!-- INSTELLINGEN -->
+  <section class="panel" aria-labelledby="h-set">
+    <details id="settingsBox">
+      <summary><h2 id="h-set" style="display:inline">Instellingen &amp; prijzen</h2></summary>
+      <div style="display:grid; gap:18px">
+        <div class="btn-row">
+          <button type="button" id="btnFetch">Benzineprijs ophalen (CBS)</button>
+          <span class="small muted" id="fetchStatus"></span>
+        </div>
+        <div class="settings">
+          <div class="field"><label for="sP95">Euro95 vandaag €/l</label><input type="number" id="sP95" step="0.001" min="0"><span class="hint">Landelijk gemiddelde</span></div>
+          <div class="field"><label for="sP98">Euro98 vandaag €/l</label><input type="number" id="sP98" step="0.001" min="0"><span class="hint">Leeg = Euro95 + toeslag</span></div>
+          <div class="field"><label for="s98Premium">Toeslag Euro98 €/l</label><input type="number" id="s98Premium" step="0.01" min="0"><span class="hint">Gebruikt als er geen 98-prijs is</span></div>
+          <div class="field"><label for="sKwh">Laadtarief €/kWh</label><input type="number" id="sKwh" step="0.001" min="0"><span class="hint">Zie je laadpas-app</span></div>
+          <div class="field"><label for="sStart">Starttarief per sessie €</label><input type="number" id="sStart" step="0.01" min="0"></div>
+          <div class="field"><label for="sElec">Stroomverbruik kWh/100 km</label><input type="number" id="sElec" step="0.1" min="1"><span class="hint">Gemeten vanaf de paal, incl. laadverlies</span></div>
+          <div class="field"><label for="sFuel">Benzineverbruik l/100 km</label><input type="number" id="sFuel" step="0.1" min="1"><span class="hint">Met lege accu, praktijk</span></div>
+          <div class="field"><label for="sBatt">kWh per volle laadbeurt</label><input type="number" id="sBatt" step="0.1" min="1"><span class="hint">Wat de paal meet bij 0→100%</span></div>
+          <div class="field"><label for="sKmDay">Standaard km per dag</label><input type="number" id="sKmDay" step="1" min="1"></div>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="ghost" id="btnReset">Standaardwaarden terugzetten</button>
+          <button type="button" class="ghost" id="btnClear">Logboek wissen</button>
+          <span class="small" id="clearConfirm" hidden>Zeker weten? <button type="button" class="link" id="btnClearYes">Ja, alles wissen</button> <button type="button" class="link" id="btnClearNo">Annuleren</button></span>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p>Benzineprijs: landelijk gemiddelde pompprijs Euro95 van het CBS (dataset 80416ned, bijgewerkt met een paar dagen vertraging). Het CBS publiceert geen Euro98; die prijs is Euro95 plus de toeslag uit de instellingen, tenzij je hem zelf invult.</p>
+    <p>Rekenmethode: elektrische km = geladen kWh ÷ stroomverbruik (max. de gereden km). Besparing = benzine die je voor die elektrische km had getankt − laadkosten. Gegevens blijven in deze browser op dit apparaat.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Standaardwaarden ----------
+  // Formentor VZ e-Hybrid 245 pk: 12,8 kWh bruto accu, laadt AC met max. 3,6 kW.
+  const DEFAULTS = {
+    p95: 2.049, p98: null, premium98: 0.14, p95Date: null, p95Source: "voorbeeldprijs",
+    kwh: 0.39, start: 0,
+    elec: 20.0, fuel: 6.6, batt: 11.0, kmDay: 40
+  };
+  const KEY_S = "lot.settings.v1", KEY_L = "lot.log.v1";
+
+  const store = {
+    get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* opslag niet beschikbaar */ } }
+  };
+
+  let S = Object.assign({}, DEFAULTS, store.get(KEY_S) || {});
+  let log = store.get(KEY_L) || [];
+  let kmToday = S.kmDay;
+
+  const $ = (id) => document.getElementById(id);
+  const eur = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
+  const eur3 = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  const n1 = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
+  const n0 = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 0 });
+  const dFmt = new Intl.DateTimeFormat("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dShort = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short" });
+  const signed = (v) => (v >= 0 ? "+" : "−") + eur.format(Math.abs(v));
+  const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const parseIso = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+
+  const p98Now = () => (S.p98 != null && S.p98 > 0 ? S.p98 : S.p95 + S.premium98);
+  const saveS = () => store.set(KEY_S, S);
+  const saveL = () => store.set(KEY_L, log);
+
+  // ---------- Rekenkern ----------
+  // Eén dag: hoeveel km elektrisch, wat kost laden, wat kost het alternatief.
+  function dayCalc(e) {
+    const elecKm = Math.min(e.km, e.kwh * 100 / S.elec);
+    const restKm = Math.max(0, e.km - elecKm);
+    const chargeCost = e.kwh * e.tarief + (e.kwh > 0 ? (e.start || 0) : 0);
+    const l100 = S.fuel / 100;
+    const only95 = e.km * l100 * e.p95;
+    const only98 = e.km * l100 * e.p98;
+    const mix95 = chargeCost + restKm * l100 * e.p95;
+    const mix98 = chargeCost + restKm * l100 * e.p98;
+    return { elecKm, restKm, chargeCost, only95, only98, mix95, mix98, save95: only95 - mix95, save98: only98 - mix98 };
+  }
+
+  // Planning voor vandaag: volle accu, rest op benzine.
+  function planToday(km) {
+    const rangeKm = S.batt * 100 / S.elec;
+    const elecKm = Math.min(km, rangeKm);
+    const kwh = elecKm * S.elec / 100;
+    return dayCalc({ km, kwh, tarief: S.kwh, start: S.start, p95: S.p95, p98: p98Now() });
+  }
+
+  // ---------- Voorbeelddata ----------
+  function exampleLog() {
+    const out = [], today = new Date();
+    const kms = [38, 52, 24, 61, 45, 0, 33, 47, 29, 74, 41, 36, 18, 55];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate() - i - 1);
+      const km = kms[13 - i];
+      if (!km) continue;
+      const kwh = Math.min(S.batt, +(km * S.elec / 100).toFixed(1));
+      const wobble = Math.sin(i * 1.3) * 0.03;
+      out.push({ date: iso(d), km, kwh, tarief: S.kwh, start: S.start, p95: +(S.p95 + wobble).toFixed(3), p98: +(p98Now() + wobble).toFixed(3), who: i % 3 ? "Ik" : "Partner", example: true });
+    }
+    return out;
+  }
+  const entries = () => (log.length ? log : exampleLog()).slice().sort((a, b) => a.date.localeCompare(b.date));
+
+  // ---------- Iconen ----------
+  const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>';
+
+  // ---------- Vandaag ----------
+  function renderToday() {
+    $("todayDate").textContent = dFmt.format(new Date());
+    $("carSummary").textContent = n1.format(S.elec) + " kWh/100 km · " + n1.format(S.fuel) + " l/100 km · ±" + n0.format(S.batt * 100 / S.elec) + " km elektrisch";
+
+    $("pKwh").innerHTML = eur3.format(S.kwh) + "<small>/kWh</small>";
+    $("pKwhSrc").textContent = S.start > 0 ? "+ " + eur.format(S.start) + " starttarief per sessie" : "Jouw tarief openbare laadpaal";
+    $("p95").innerHTML = eur3.format(S.p95) + "<small>/l</small>";
+    $("p95Src").textContent = S.p95Date ? "CBS landelijk gem. · " + dShort.format(parseIso(S.p95Date)) : (S.p95Source === "handmatig" ? "Handmatig ingevuld" : "Voorbeeldprijs, haal de actuele op");
+    $("p98").innerHTML = eur3.format(p98Now()) + "<small>/l</small>";
+    $("p98Src").textContent = S.p98 ? "Handmatig ingevuld" : "Euro95 + " + eur.format(S.premium98) + " toeslag";
+
+    // Break-even: tot welke kWh-prijs is laden goedkoper?
+    const be95 = (S.fuel * S.p95) / S.elec;
+    const be98 = (S.fuel * p98Now()) / S.elec;
+    const cheaper = S.kwh < be95;
+    const pill = $("verdictPill");
+    pill.className = "pill " + (cheaper ? "good" : "bad");
+    pill.innerHTML = (cheaper ? ICON_UP + "Laden is voordeliger" : ICON_X + "Tanken is voordeliger");
+    $("verdictLine").innerHTML = cheaper
+      ? "Laden blijft goedkoper zolang de kWh-prijs onder <strong class='num'>" + eur3.format(be95) + "</strong> ligt (Euro95) of <strong class='num'>" + eur3.format(be98) + "</strong> (Euro98)."
+      : "Bij " + eur3.format(S.kwh) + "/kWh is benzine goedkoper. Laden wordt pas voordelig onder <strong class='num'>" + eur3.format(be95) + "</strong>/kWh.";
+
+    $("kmToday").value = kmToday;
+    $("kmTodayOut").textContent = kmToday + " km";
+
+    const p = planToday(kmToday);
+    const rows = [
+      { name: "Laden + rest Euro95", color: "var(--s-laden)", total: p.mix95, parts: [[p.chargeCost, "var(--s-laden)"], [p.mix95 - p.chargeCost, "var(--s-e95)"]], sub: n0.format(p.elecKm) + " km elektrisch" + (p.restKm > 0 ? ", " + n0.format(p.restKm) + " km op Euro95" : "") },
+      { name: "Laden + rest Euro98", color: "var(--s-laden)", total: p.mix98, parts: [[p.chargeCost, "var(--s-laden)"], [p.mix98 - p.chargeCost, "var(--s-e98)"]], sub: p.restKm > 0 ? n0.format(p.restKm) + " km op Euro98" : "" },
+      { name: "Alleen Euro95", color: "var(--s-e95)", total: p.only95, parts: [[p.only95, "var(--s-e95)"]] },
+      { name: "Alleen Euro98", color: "var(--s-e98)", total: p.only98, parts: [[p.only98, "var(--s-e98)"]] }
+    ];
+    const max = Math.max(...rows.map(r => r.total)) || 1;
+    $("options").innerHTML = rows.map(r => {
+      const bars = r.parts.filter(pt => pt[0] > 0.0005).map(pt => '<i style="width:' + (pt[0] / max * 100).toFixed(2) + '%;background:' + pt[1] + '"></i>').join("");
+      return '<div class="opt"><div class="name"><i class="swatch" style="background:' + r.color + '"></i><span>' + r.name + '</span></div>' +
+        '<div class="bar" role="img" aria-label="' + r.name + ': ' + eur.format(r.total) + '">' + bars + '</div>' +
+        '<div class="cost"><b>' + eur.format(r.total) + '</b><div>' + eur.format(r.total / kmToday * 100) + ' /100 km</div></div>' +
+        (r.sub ? '<div class="sub">' + r.sub + '</div>' : "") + '</div>';
+    }).join("");
+
+    const perKmE = S.elec / 100 * S.kwh, perKm95 = S.fuel / 100 * S.p95, perKm98 = S.fuel / 100 * p98Now();
+    $("perKm").innerHTML = "Per kilometer: elektrisch <span class='num'>" + eur3.format(perKmE) + "</span>, Euro95 <span class='num'>" + eur3.format(perKm95) + "</span>, Euro98 <span class='num'>" + eur3.format(perKm98) + "</span>. " +
+      "Vandaag " + (p.save95 >= 0 ? "bespaar" : "verlies") + " je <b class='num'>" + eur.format(Math.abs(p.save95)) + "</b> t.o.v. Euro95 en <b class='num'>" + eur.format(Math.abs(p.save98)) + "</b> " + (p.save98 >= 0 ? "bespaard" : "extra") + " t.o.v. Euro98" +
+      " · ±" + eur.format(p.save95 * 30) + " per maand bij dagelijks laden.";
+  }
+
+  // ---------- Logboek ----------
+  function renderLog() {
+    const list = entries();
+    const isEx = !log.length;
+    $("exampleNotice").hidden = !isEx;
+    const calc = list.map(e => Object.assign({ e }, dayCalc(e)));
+
+    const tot = calc.reduce((a, c) => {
+      a.km += c.e.km; a.kwh += c.e.kwh; a.ek += c.elecKm; a.charge += c.chargeCost; a.s95 += c.save95; a.s98 += c.save98; return a;
+    }, { km: 0, kwh: 0, ek: 0, charge: 0, s95: 0, s98: 0 });
+    const days = calc.length || 1;
+    const cls = (v) => (v >= 0 ? "good" : "bad");
+    $("tiles").innerHTML = [
+      ["Bespaard t.o.v. Euro95", signed(tot.s95), cls(tot.s95), eur.format(tot.s95 / days) + " gemiddeld per dag"],
+      ["Bespaard t.o.v. Euro98", signed(tot.s98), cls(tot.s98), eur.format(tot.s98 / days) + " gemiddeld per dag"],
+      ["Elektrisch gereden", n0.format(tot.ek) + " km", "", n0.format(tot.km ? tot.ek / tot.km * 100 : 0) + "% van " + n0.format(tot.km) + " km"],
+      ["Uitgegeven aan laden", eur.format(tot.charge), "", n1.format(tot.kwh) + " kWh over " + calc.length + " dagen"]
+    ].map(t => '<div class="tile"><span class="label">' + t[0] + '</span><span class="v ' + t[2] + '">' + t[1] + '</span><span class="d">' + t[3] + '</span></div>').join("");
+
+    $("tbody").innerHTML = calc.slice().reverse().map(c => {
+      const e = c.e;
+      return '<tr class="' + (e.example ? "example" : "") + '"><td>' + dShort.format(parseIso(e.date)) + '</td><td>' + (e.who || "") + '</td><td>' + n0.format(e.km) + '</td><td>' + n1.format(e.kwh) + '</td><td>' + n0.format(c.elecKm) + '</td><td>' + eur.format(c.chargeCost) +
+        '</td><td>' + eur.format(c.mix95) + '</td><td>' + eur.format(c.only95) + '</td><td>' + eur.format(c.only98) + '</td><td class="' + cls(c.save95) + '">' + signed(c.save95) + '</td><td class="' + cls(c.save98) + '">' + signed(c.save98) + '</td><td>' +
+        (e.example ? "" : '<button type="button" class="link" data-del="' + e.id + '" aria-label="Verwijder ' + e.date + '">Verwijder</button>') + '</td></tr>';
+    }).join("");
+
+    drawDaily(calc.slice(-14));
+    drawCum(calc);
+  }
+
+  // ---------- Grafieken (SVG) ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+  // Kies 4 of 5 rasterlijnen zodat de stap een rond bedrag is (1, 2, 5 × 10^n).
+  function tickCount(span) { for (const k of [5, 4]) { const st = span / k, p = Math.pow(10, Math.floor(Math.log10(st))), f = +(st / p).toFixed(6); if ([1, 2, 5].includes(f)) return k; } return 4; }
+  function niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+  function tipFor(box) {
+    let t = box.querySelector(".tip");
+    if (!t) { t = document.createElement("div"); t.className = "tip"; t.hidden = true; box.appendChild(t); }
+    return t;
+  }
+  function showTip(box, x, y, html) { const t = tipFor(box); t.innerHTML = html; t.style.left = x + "px"; t.style.top = y + "px"; t.hidden = false; }
+  function hideTip(box) { const t = box.querySelector(".tip"); if (t) t.hidden = true; }
+  const tipRow = (c, label, v) => '<div class="row"><i class="swatch" style="background:' + c + '"></i>' + label + ': ' + v + '</div>';
+
+  function drawDaily(calc) {
+    const box = $("chartDaily"), host = box.querySelector(".svg-host");
+    host.innerHTML = "";
+    const W = Math.max(300, host.clientWidth || 480), H = 240, m = { l: 44, r: 8, t: 10, b: 26 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Kosten per dag: met laden, alleen Euro95, alleen Euro98" }, host);
+    const max = niceMax(Math.max(...calc.map(c => Math.max(c.mix95, c.only95, c.only98)), 1));
+    const y = (v) => m.t + (H - m.t - m.b) * (1 - v / max);
+    const g = el("g", { class: "grid" }, svg);
+    const tk = tickCount(max);
+    for (let i = 0; i <= tk; i++) {
+      const v = max * i / tk;
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }, g);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg).textContent = "€" + n1.format(v);
+    }
+    const n = calc.length || 1, slot = (W - m.l - m.r) / n;
+    const bw = Math.max(3, Math.min(14, (slot - 8) / 3 - 2));
+    const series = [["mix95", "var(--s-laden)", "Met laden"], ["only95", "var(--s-e95)", "Alleen E95"], ["only98", "var(--s-e98)", "Alleen E98"]];
+    calc.forEach((c, i) => {
+      const cx = m.l + slot * i + slot / 2;
+      const x0 = cx - (bw * 3 + 4) / 2;
+      series.forEach((s, j) => {
+        const v = c[s[0]], top = y(v), h = Math.max(0, y(0) - top), x = x0 + j * (bw + 2), r = Math.min(4, bw / 2, h);
+        el("path", { d: "M" + x + "," + y(0) + "V" + (top + r) + "Q" + x + "," + top + " " + (x + r) + "," + top + "H" + (x + bw - r) + "Q" + (x + bw) + "," + top + " " + (x + bw) + "," + (top + r) + "V" + y(0) + "Z", fill: s[1] }, svg);
+      });
+      const every = Math.ceil(n / Math.max(2, Math.floor((W - m.l - m.r) / 52)));
+      if (i % every === 0)
+        el("text", { x: cx, y: H - 8, "text-anchor": "middle" }, svg).textContent = dShort.format(parseIso(c.e.date));
+      const hit = el("rect", { x: m.l + slot * i, y: m.t, width: slot, height: H - m.t - m.b, fill: "transparent" }, svg);
+      hit.addEventListener("mouseenter", () => {
+        const sc = host.clientWidth / W;
+        showTip(box, (cx) * sc, host.offsetTop + y(c.only98) * sc,
+          "<b>" + dShort.format(parseIso(c.e.date)) + " · " + c.e.km + " km</b>" + tipRow("var(--s-laden)", "Met laden", eur.format(c.mix95)) + tipRow("var(--s-e95)", "Alleen E95", eur.format(c.only95)) + tipRow("var(--s-e98)", "Alleen E98", eur.format(c.only98)));
+      });
+      hit.addEventListener("mouseleave", () => hideTip(box));
+    });
+    el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: y(0), y2: y(0) }, svg);
+  }
+
+  function drawCum(calc) {
+    const box = $("chartCum"), host = box.querySelector(".svg-host");
+    host.innerHTML = "";
+    const W = Math.max(300, host.clientWidth || 480), H = 240, m = { l: 44, r: 64, t: 10, b: 26 };
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Opgebouwde besparing t.o.v. Euro95 en Euro98" }, host);
+    let a = 0, b = 0;
+    const pts = calc.map(c => { a += c.save95; b += c.save98; return { c, s95: a, s98: b }; });
+    const vals = pts.flatMap(p => [p.s95, p.s98]).concat([0]);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    hi = hi > 0 ? niceMax(hi) : 0; lo = lo < 0 ? -niceMax(-lo) : 0;
+    if (hi === lo) hi = 1;
+    const y = (v) => m.t + (H - m.t - m.b) * (hi - v) / (hi - lo);
+    const n = Math.max(1, pts.length - 1);
+    const x = (i) => m.l + (W - m.l - m.r) * (pts.length === 1 ? 0.5 : i / n);
+    const g = el("g", { class: "grid" }, svg);
+    const tk = tickCount(hi - lo);
+    for (let i = 0; i <= tk; i++) {
+      const v = lo + (hi - lo) * i / tk;
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }, g);
+      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg).textContent = "€" + n0.format(v);
+    }
+    el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: y(0), y2: y(0) }, svg);
+    [["s95", "var(--s-e95)"], ["s98", "var(--s-e98)"]].forEach(([k, col]) => {
+      if (!pts.length) return;
+      const d = pts.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(p[k]).toFixed(1)).join("");
+      el("path", { d: d + "L" + x(pts.length - 1) + "," + y(0) + "L" + x(0) + "," + y(0) + "Z", fill: col, "fill-opacity": 0.08 }, svg);
+      el("path", { d, fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      const last = pts[pts.length - 1];
+      el("circle", { cx: x(pts.length - 1), cy: y(last[k]), r: 4, fill: col, stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    });
+    if (pts.length) {
+      const last = pts[pts.length - 1];
+      let y95 = y(last.s95) + 4, y98 = y(last.s98) + 4;
+      if (Math.abs(y95 - y98) < 13) { if (y95 <= y98) { y95 -= 7; y98 += 7; } else { y95 += 7; y98 -= 7; } }
+      el("text", { x: x(pts.length - 1) + 8, y: y95, style: "fill:var(--fg)" }, svg).textContent = signed(last.s95);
+      el("text", { x: x(pts.length - 1) + 8, y: y98, style: "fill:var(--fg)" }, svg).textContent = signed(last.s98);
+      el("text", { x: x(0), y: H - 8, "text-anchor": "start" }, svg).textContent = dShort.format(parseIso(pts[0].c.e.date));
+      if (pts.length > 1) el("text", { x: x(pts.length - 1), y: H - 8, "text-anchor": "end" }, svg).textContent = dShort.format(parseIso(last.c.e.date));
+    }
+    const cross = el("line", { x1: 0, x2: 0, y1: m.t, y2: H - m.b, stroke: "var(--fg-3)", "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+    const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", (ev) => {
+      if (!pts.length) return;
+      const r = svg.getBoundingClientRect(), sc = r.width / W;
+      const px = (ev.clientX - r.left) / sc;
+      const i = Math.max(0, Math.min(pts.length - 1, Math.round((px - m.l) / ((W - m.l - m.r) / n))));
+      const p = pts[i];
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+      showTip(box, x(i) * sc, host.offsetTop + y(Math.max(p.s95, p.s98)) * sc,
+        "<b>t/m " + dShort.format(parseIso(p.c.e.date)) + "</b>" + tipRow("var(--s-e95)", "vs E95", signed(p.s95)) + tipRow("var(--s-e98)", "vs E98", signed(p.s98)));
+    });
+    hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(box); });
+  }
+
+  // ---------- Formulieren ----------
+  function fillEntryDefaults() {
+    $("fDate").value = iso(new Date());
+    $("fTarief").value = S.kwh;
+    $("fStart").value = S.start || "";
+    $("f95").value = S.p95;
+    $("f98").value = +p98Now().toFixed(3);
+  }
+  function fillSettings() {
+    $("sP95").value = S.p95; $("sP98").value = S.p98 || ""; $("s98Premium").value = S.premium98;
+    $("sKwh").value = S.kwh; $("sStart").value = S.start; $("sElec").value = S.elec; $("sFuel").value = S.fuel;
+    $("sBatt").value = S.batt; $("sKmDay").value = S.kmDay;
+  }
+  const num = (id) => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+
+  $("entryForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const e = { id: Date.now().toString(36), date: $("fDate").value, km: num("fKm") || 0, kwh: num("fKwh") || 0, tarief: num("fTarief") || 0, start: num("fStart") || 0, p95: num("f95") || S.p95, p98: num("f98") || p98Now(), who: $("fWho").value };
+    if (!e.date) return;
+    log = log.filter(x => !(x.date === e.date && x.who === e.who));
+    log.push(e); saveL();
+    $("fKm").value = ""; $("fKwh").value = "";
+    renderLog();
+  });
+  $("tbody").addEventListener("click", (ev) => {
+    const id = ev.target.getAttribute && ev.target.getAttribute("data-del");
+    if (!id) return;
+    log = log.filter(x => x.id !== id); saveL(); renderLog();
+  });
+
+  const settingMap = { sP95: "p95", sP98: "p98", s98Premium: "premium98", sKwh: "kwh", sStart: "start", sElec: "elec", sFuel: "fuel", sBatt: "batt", sKmDay: "kmDay" };
+  Object.keys(settingMap).forEach(id => $(id).addEventListener("input", () => {
+    const k = settingMap[id], v = num(id);
+    if (k === "p98") S.p98 = v && v > 0 ? v : null;
+    else if (v != null && (v > 0 || k === "start" || k === "premium98")) S[k] = v;
+    if (k === "p95") { S.p95Date = null; S.p95Source = "handmatig"; }
+    if (k === "kmDay") kmToday = S.kmDay;
+    saveS(); renderAll(false);
+  }));
+  $("kmToday").addEventListener("input", (ev) => { kmToday = +ev.target.value; renderToday(); });
+  $("btnReset").addEventListener("click", () => { S = Object.assign({}, DEFAULTS); kmToday = S.kmDay; saveS(); fillSettings(); renderAll(true); });
+  $("btnClear").addEventListener("click", () => { $("clearConfirm").hidden = false; });
+  $("btnClearNo").addEventListener("click", () => { $("clearConfirm").hidden = true; });
+  $("btnClearYes").addEventListener("click", () => { log = []; saveL(); $("clearConfirm").hidden = true; renderLog(); });
+
+  // ---------- CBS: landelijke gemiddelde pompprijs Euro95 ----------
+  async function fetchCBS(manual) {
+    const status = $("fetchStatus");
+    status.textContent = "Ophalen…";
+    const url = "https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?$orderby=Perioden%20desc&$top=10";
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      const row = (json.value || []).find(r => {
+        const k = Object.keys(r).find(k => /^BenzineEuro95/i.test(k));
+        return k && r[k] != null;
+      });
+      if (!row) throw new Error("geen Euro95-waarde in de reeks");
+      const key = Object.keys(row).find(k => /^BenzineEuro95/i.test(k));
+      const m = String(row.Perioden || "").match(/(\d{4})\D*(\d{2})\D*(\d{2})/);
+      S.p95 = +(+row[key]).toFixed(3);
+      S.p95Date = m ? m[1] + "-" + m[2] + "-" + m[3] : iso(new Date());
+      S.p95Source = "CBS";
+      S.lastFetch = iso(new Date());
+      saveS(); fillSettings(); renderAll(true);
+      status.textContent = "Euro95 bijgewerkt: " + eur3.format(S.p95) + " (" + dShort.format(parseIso(S.p95Date)) + ")";
+    } catch (err) {
+      status.textContent = manual
+        ? "Ophalen lukte niet (" + err.message + "). Vul de prijs hieronder zelf in, bijvoorbeeld van unitedconsumers.com."
+        : "";
+    }
+  }
+  $("btnFetch").addEventListener("click", () => fetchCBS(true));
+
+  // ---------- Opstart ----------
+  function renderAll(resetForm) { renderToday(); renderLog(); if (resetForm) fillEntryDefaults(); }
+  fillSettings();
+  renderAll(true);
+  if (S.lastFetch !== iso(new Date())) fetchCBS(false);
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(renderLog, 150); });
+})();
+</script>
+</body>
+</html>
