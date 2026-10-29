@@ -155,6 +155,10 @@ button.link { background: none; border: none; color: var(--fg-3); padding: 4px 6
 button.link:hover { color: var(--bad); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
+.import-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px; border: 1px dashed var(--line); border-radius: var(--r); }
+.import-row .status { flex: 1 1 260px; min-width: 0; font-size: 0.86rem; color: var(--fg-2); }
+.import-row .status.good { color: var(--good); }
+.import-row .status.bad { color: var(--bad); }
 .notice { font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); color: var(--fg-2); }
 .notice b { color: var(--fg); }
 
@@ -255,10 +259,16 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
 
     <div class="notice" id="exampleNotice" hidden><b>Voorbeelddata.</b> Hieronder staan 14 verzonnen dagen zodat je ziet hoe het werkt. Zodra je je eerste eigen dag toevoegt, verdwijnen ze.</div>
 
+    <div class="import-row">
+      <button type="button" id="btnImport">ANWB-factuur inlezen (PDF)</button>
+      <input type="file" id="fileImport" accept="application/pdf,.pdf" hidden>
+      <p class="status" id="importStatus">Kies de maandelijkse factuurspecificatie van ANWB. De app zet alle laadsessies per dag in het logboek. Het bestand blijft op dit apparaat.</p>
+    </div>
+
     <form class="entry" id="entryForm">
       <div class="field"><label for="fDate">Datum</label><input type="date" id="fDate" required></div>
       <div class="field"><label for="fKm">Gereden km</label><input type="number" id="fKm" min="0" step="1" required placeholder="42"></div>
-      <div class="field"><label for="fKwh">Geladen kWh</label><input type="number" id="fKwh" min="0" step="0.01" required placeholder="10.5"></div>
+      <div class="field"><label for="fKwh">Geladen kWh</label><input type="number" id="fKwh" min="0" step="0.01" placeholder="10.5"></div>
       <div class="field"><label for="fTarief">€ per kWh</label><input type="number" id="fTarief" min="0" step="0.001" required></div>
       <div class="field"><label for="fStart">Starttarief €</label><input type="number" id="fStart" min="0" step="0.01"></div>
       <div class="field"><label for="f95">Euro95 €/l</label><input type="number" id="f95" min="0" step="0.001" required></div>
@@ -266,6 +276,7 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
       <div class="field"><label for="fWho">Wie</label><select id="fWho"><option>Ik</option><option>Partner</option><option>Samen</option></select></div>
       <div class="field"><button type="submit">Dag opslaan</button></div>
     </form>
+    <p class="small muted">Dag uit de ANWB-factuur? Vul alleen de datum en de gereden km in, dan worden de km aan die dag toegevoegd. Zonder km rekent de app de elektrische km uit de geladen kWh.</p>
 
     <div class="tiles" id="tiles"></div>
 
@@ -379,16 +390,19 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
 
   // ---------- Rekenkern ----------
   // Eén dag: hoeveel km elektrisch, wat kost laden, wat kost het alternatief.
+  // Zonder ingevulde km (dag uit een factuur) gaan we uit van alleen elektrische km.
   function dayCalc(e) {
-    const elecKm = Math.min(e.km, e.kwh * 100 / S.elec);
-    const restKm = Math.max(0, e.km - elecKm);
-    const chargeCost = e.kwh * e.tarief + (e.kwh > 0 ? (e.start || 0) : 0);
+    const kwhKm = e.kwh * 100 / S.elec;
+    const km = e.km == null ? kwhKm : e.km;
+    const elecKm = Math.min(km, kwhKm);
+    const restKm = Math.max(0, km - elecKm);
+    const chargeCost = e.cost != null ? e.cost : e.kwh * e.tarief + (e.kwh > 0 ? (e.start || 0) : 0);
     const l100 = S.fuel / 100;
-    const only95 = e.km * l100 * e.p95;
-    const only98 = e.km * l100 * e.p98;
+    const only95 = km * l100 * e.p95;
+    const only98 = km * l100 * e.p98;
     const mix95 = chargeCost + restKm * l100 * e.p95;
     const mix98 = chargeCost + restKm * l100 * e.p98;
-    return { elecKm, restKm, chargeCost, only95, only98, mix95, mix98, save95: only95 - mix95, save98: only98 - mix98 };
+    return { km, elecKm, restKm, chargeCost, only95, only98, mix95, mix98, save95: only95 - mix95, save98: only98 - mix98 };
   }
 
   // Planning voor vandaag: volle accu, rest op benzine.
@@ -474,26 +488,27 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     $("exampleNotice").hidden = !isEx;
     const calc = list.map(e => Object.assign({ e }, dayCalc(e)));
 
+    const kmGuessed = calc.some(c => c.e.km == null);
     const tot = calc.reduce((a, c) => {
-      a.km += c.e.km; a.kwh += c.e.kwh; a.ek += c.elecKm; a.charge += c.chargeCost; a.s95 += c.save95; a.s98 += c.save98; return a;
+      a.km += c.km; a.kwh += c.e.kwh; a.ek += c.elecKm; a.charge += c.chargeCost; a.s95 += c.save95; a.s98 += c.save98; return a;
     }, { km: 0, kwh: 0, ek: 0, charge: 0, s95: 0, s98: 0 });
     const days = calc.length || 1;
     const cls = (v) => (v >= 0 ? "good" : "bad");
     $("tiles").innerHTML = [
       ["Bespaard t.o.v. Euro95", signed(tot.s95), cls(tot.s95), eur.format(tot.s95 / days) + " gemiddeld per dag"],
       ["Bespaard t.o.v. Euro98", signed(tot.s98), cls(tot.s98), eur.format(tot.s98 / days) + " gemiddeld per dag"],
-      ["Elektrisch gereden", n0.format(tot.ek) + " km", "", n0.format(tot.km ? tot.ek / tot.km * 100 : 0) + "% van " + n0.format(tot.km) + " km"],
+      ["Elektrisch gereden", n0.format(tot.ek) + " km", "", n0.format(tot.km ? tot.ek / tot.km * 100 : 0) + "% van " + n0.format(tot.km) + " km" + (kmGuessed ? " (deels berekend uit kWh)" : "")],
       ["Uitgegeven aan laden", eur.format(tot.charge), "", n1.format(tot.kwh) + " kWh over " + calc.length + " dagen"]
     ].map(t => '<div class="tile"><span class="label">' + t[0] + '</span><span class="v ' + t[2] + '">' + t[1] + '</span><span class="d">' + t[3] + '</span></div>').join("");
 
     $("tbody").innerHTML = calc.slice().reverse().map(c => {
       const e = c.e;
-      return '<tr class="' + (e.example ? "example" : "") + '"><td>' + dShort.format(parseIso(e.date)) + '</td><td>' + (e.who || "") + '</td><td>' + n0.format(e.km) + '</td><td>' + n1.format(e.kwh) + '</td><td>' + n0.format(c.elecKm) + '</td><td>' + eur.format(c.chargeCost) +
+      return '<tr class="' + (e.example ? "example" : "") + '"><td>' + dShort.format(parseIso(e.date)) + '</td><td>' + (e.who || (e.source === "anwb" ? "ANWB" : "")) + '</td><td>' + (e.km == null ? "–" : n0.format(e.km)) + '</td><td>' + n1.format(e.kwh) + '</td><td>' + n0.format(c.elecKm) + '</td><td>' + eur.format(c.chargeCost) +
         '</td><td>' + eur.format(c.mix95) + '</td><td>' + eur.format(c.only95) + '</td><td>' + eur.format(c.only98) + '</td><td class="' + cls(c.save95) + '">' + signed(c.save95) + '</td><td class="' + cls(c.save98) + '">' + signed(c.save98) + '</td><td>' +
         (e.example ? "" : '<button type="button" class="link" data-del="' + e.id + '" aria-label="Verwijder ' + e.date + '">Verwijder</button>') + '</td></tr>';
     }).join("");
 
-    drawDaily(calc.slice(-14));
+    drawDaily(calc.slice(-31));
     drawCum(calc);
   }
 
@@ -543,7 +558,7 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
       hit.addEventListener("mouseenter", () => {
         const sc = host.clientWidth / W;
         showTip(box, (cx) * sc, host.offsetTop + y(c.only98) * sc,
-          "<b>" + dShort.format(parseIso(c.e.date)) + " · " + c.e.km + " km</b>" + tipRow("var(--s-laden)", "Met laden", eur.format(c.mix95)) + tipRow("var(--s-e95)", "Alleen E95", eur.format(c.only95)) + tipRow("var(--s-e98)", "Alleen E98", eur.format(c.only98)));
+          "<b>" + dShort.format(parseIso(c.e.date)) + " · " + n0.format(c.km) + " km</b>" + tipRow("var(--s-laden)", "Met laden", eur.format(c.mix95)) + tipRow("var(--s-e95)", "Alleen E95", eur.format(c.only95)) + tipRow("var(--s-e98)", "Alleen E98", eur.format(c.only98)));
       });
       hit.addEventListener("mouseleave", () => hideTip(box));
     });
@@ -621,7 +636,14 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
 
   $("entryForm").addEventListener("submit", (ev) => {
     ev.preventDefault();
-    const e = { id: Date.now().toString(36), date: $("fDate").value, km: num("fKm") || 0, kwh: num("fKwh") || 0, tarief: num("fTarief") || 0, start: num("fStart") || 0, p95: num("f95") || S.p95, p98: num("f98") || p98Now(), who: $("fWho").value };
+    const date = $("fDate").value, km = num("fKm") || 0;
+    const fromInvoice = log.find(x => x.date === date && x.source === "anwb");
+    if (fromInvoice && $("fKwh").value === "") {
+      fromInvoice.km = km; fromInvoice.who = $("fWho").value;
+      saveL(); $("fKm").value = ""; renderLog();
+      return;
+    }
+    const e = { id: Date.now().toString(36), date, km, kwh: num("fKwh") || 0, tarief: num("fTarief") || 0, start: num("fStart") || 0, p95: num("f95") || S.p95, p98: num("f98") || p98Now(), who: $("fWho").value };
     if (!e.date) return;
     log = log.filter(x => !(x.date === e.date && x.who === e.who));
     log.push(e); saveL();
@@ -650,23 +672,29 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
   $("btnClearYes").addEventListener("click", () => { log = []; saveL(); $("clearConfirm").hidden = true; renderLog(); });
 
   // ---------- CBS: landelijke gemiddelde pompprijs Euro95 ----------
+  // Dagprijzen Euro95, nieuwste eerst: [{ date: "2026-09-29", p95: 2.041 }, ...]
+  async function cbsSeries(top) {
+    const url = "https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?$orderby=Perioden%20desc&$top=" + top;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    const out = [];
+    for (const r of json.value || []) {
+      const key = Object.keys(r).find(k => /^BenzineEuro95/i.test(k));
+      const m = String(r.Perioden || "").match(/(\d{4})\D*(\d{2})\D*(\d{2})/);
+      if (key && r[key] != null && m) out.push({ date: m[1] + "-" + m[2] + "-" + m[3], p95: +(+r[key]).toFixed(3) });
+    }
+    if (!out.length) throw new Error("geen Euro95-waarde in de reeks");
+    return out;
+  }
+
   async function fetchCBS(manual) {
     const status = $("fetchStatus");
     status.textContent = "Ophalen…";
-    const url = "https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?$orderby=Perioden%20desc&$top=10";
     try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const json = await res.json();
-      const row = (json.value || []).find(r => {
-        const k = Object.keys(r).find(k => /^BenzineEuro95/i.test(k));
-        return k && r[k] != null;
-      });
-      if (!row) throw new Error("geen Euro95-waarde in de reeks");
-      const key = Object.keys(row).find(k => /^BenzineEuro95/i.test(k));
-      const m = String(row.Perioden || "").match(/(\d{4})\D*(\d{2})\D*(\d{2})/);
-      S.p95 = +(+row[key]).toFixed(3);
-      S.p95Date = m ? m[1] + "-" + m[2] + "-" + m[3] : iso(new Date());
+      const latest = (await cbsSeries(10))[0];
+      S.p95 = latest.p95;
+      S.p95Date = latest.date;
       S.p95Source = "CBS";
       S.lastFetch = iso(new Date());
       saveS(); fillSettings(); renderAll(true);
@@ -678,6 +706,135 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     }
   }
   $("btnFetch").addEventListener("click", () => fetchCBS(true));
+
+  // ---------- ANWB-factuur (PDF) inlezen ----------
+  // pdf.js wordt pas geladen als je een factuur kiest. Het worker-script zet
+  // window.pdfjsWorker, zodat pdf.js zonder aparte Web Worker werkt.
+  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  let pdfReady = null;
+  const loadScript = (src) => new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res;
+    s.onerror = () => rej(new Error("PDF-lezer kon niet laden, controleer je internetverbinding"));
+    document.head.appendChild(s);
+  });
+  function loadPdfJs() {
+    if (!pdfReady) {
+      pdfReady = loadScript(PDFJS + "pdf.min.js")
+        .then(() => loadScript(PDFJS + "pdf.worker.min.js"))
+        .then(() => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; return window.pdfjsLib; });
+      pdfReady.catch(() => { pdfReady = null; });
+    }
+    return pdfReady;
+  }
+  async function pdfText(file) {
+    const lib = await loadPdfJs();
+    const doc = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    let out = "";
+    for (let i = 1; i <= doc.numPages; i++) {
+      const tc = await (await doc.getPage(i)).getTextContent();
+      for (const it of tc.items) out += it.str + (it.hasEOL ? "\n" : " ");
+      out += "\n";
+    }
+    return out;
+  }
+
+  const nlNum = (s) => parseFloat(String(s).replace(/\./g, "").replace(",", "."));
+
+  // Factuurspecificatie ANWB: per sessie een regel "29-09-2026 16:30:18 | kWh: 8,28 | Duur: ..."
+  // gevolgd door "Subtotalen: Energie: EUR 2,42 | Toeslagen: EUR 0,25 | Vast: EUR 0,74" (excl. btw).
+  // De prijs-kolom staat soms vóór de datumregel (bij een paginawissel), dus we rekenen met de subtotalen.
+  function parseAnwb(text) {
+    const btwM = text.match(/Btw\s+([\d.,]+)\s*%/i);
+    const btw = btwM ? nlNum(btwM[1]) / 100 : 0.21;
+    const sessions = [];
+    let cur = null;
+    for (const raw of text.split("\n")) {
+      const l = raw.trim();
+      const m = l.match(/(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})(?::\d{2})?\s*\|\s*kWh:\s*([\d.,]+)/i);
+      if (m) { cur = { date: m[3] + "-" + m[2] + "-" + m[1], time: m[4], kwh: nlNum(m[5]), excl: null }; sessions.push(cur); continue; }
+      const sm = l.match(/^Subtotalen:\s*(.*)$/i);
+      if (sm && cur && cur.excl == null) {
+        cur.excl = sm[1].split("|").reduce((sum, part) => {
+          const e = part.match(/EUR\s*([\d.,]+)/i);
+          return sum + (e ? nlNum(e[1]) : 0);
+        }, 0);
+      }
+    }
+    const tE = text.match(/Totaal\s*\(excl\.?\s*btw\)\s*EUR\s*([\d.,]+)/i);
+    const tI = text.match(/Totaal\s*\(incl\.?\s*btw\)\s*EUR\s*([\d.,]+)/i);
+    const ok = sessions.filter(x => x.excl != null);
+    return { sessions: ok, missing: sessions.length - ok.length, btw, totExcl: tE ? nlNum(tE[1]) : null, totIncl: tI ? nlNum(tI[1]) : null };
+  }
+
+  // Benzineprijs op een datum: CBS-dagprijs van die dag of de laatste dag ervoor.
+  function priceOn(series, date) {
+    if (!series) return null;
+    const hit = series.find(x => x.date <= date);
+    return hit ? hit.p95 : null;
+  }
+
+  async function importInvoice(file) {
+    const st = $("importStatus");
+    st.className = "status"; st.textContent = "Factuur lezen…";
+    try {
+      const inv = parseAnwb(await pdfText(file));
+      if (!inv.sessions.length) throw new Error("geen laadsessies gevonden. Is dit de factuurspecificatie van ANWB?");
+
+      const days = {};
+      for (const x of inv.sessions) {
+        const d = days[x.date] || (days[x.date] = { kwh: 0, cost: 0, n: 0 });
+        d.kwh += x.kwh; d.cost += x.excl * (1 + inv.btw); d.n++;
+      }
+      let series = null;
+      try { series = await cbsSeries(400); } catch (e) { /* CBS niet bereikbaar: huidige prijs */ }
+
+      let usedCbs = 0;
+      for (const date of Object.keys(days)) {
+        const d = days[date];
+        const same = log.filter(x => x.date === date);
+        const manualKm = same.filter(x => x.source !== "anwb").reduce((a, x) => a + (x.km || 0), 0);
+        const prev = same.find(x => x.source === "anwb");
+        const p95 = priceOn(series, date);
+        if (p95) usedCbs++;
+        log = log.filter(x => x.date !== date);
+        log.push({
+          id: "anwb-" + date, date, source: "anwb", sessions: d.n,
+          km: prev && prev.km != null ? prev.km : (manualKm || null),
+          who: prev ? prev.who : (same[0] && same[0].who) || "",
+          kwh: +d.kwh.toFixed(2), cost: d.cost, tarief: d.cost / d.kwh, start: 0,
+          p95: p95 || S.p95, p98: +((p95 || S.p95) + S.premium98).toFixed(3)
+        });
+      }
+      saveL();
+
+      const kwhTot = inv.sessions.reduce((a, x) => a + x.kwh, 0);
+      const exclTot = inv.sessions.reduce((a, x) => a + x.excl, 0);
+      const inclTot = exclTot * (1 + inv.btw);
+      S.kwh = +(inclTot / kwhTot).toFixed(3); S.start = 0;
+      saveS(); fillSettings(); renderAll(true);
+
+      const dates = Object.keys(days).sort();
+      const matches = inv.totExcl == null || Math.abs(inv.totExcl - exclTot) < 0.02;
+      st.className = "status " + (matches && !inv.missing ? "good" : "bad");
+      st.textContent = inv.sessions.length + " laadsessies op " + dates.length + " dagen ingelezen (" +
+        dShort.format(parseIso(dates[0])) + " – " + dShort.format(parseIso(dates[dates.length - 1])) + "): " +
+        n1.format(kwhTot) + " kWh voor " + eur.format(inclTot) + " incl. btw" +
+        (matches ? (inv.totExcl != null ? ", gelijk aan het factuurtotaal." : ".") : ". Let op: het factuurtotaal is " + eur.format(inv.totIncl || inv.totExcl) + ", controleer de sessies.") +
+        (inv.missing ? " " + inv.missing + " sessie(s) zonder bedrag overgeslagen." : "") +
+        " Laadtarief bij Vandaag: " + eur3.format(S.kwh) + "/kWh (gemiddelde van deze factuur)." +
+        (usedCbs === dates.length ? " Benzineprijzen: CBS-dagprijzen." : " Benzineprijzen: CBS-dagprijs niet beschikbaar, huidige prijs gebruikt.");
+    } catch (err) {
+      st.className = "status bad";
+      st.textContent = "Inlezen lukte niet: " + err.message;
+    }
+  }
+  $("btnImport").addEventListener("click", () => $("fileImport").click());
+  $("fileImport").addEventListener("change", (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (f) importInvoice(f);
+    ev.target.value = "";
+  });
 
   // ---------- Licht / donker ----------
   // Zonder eigen keuze volgt de app de instelling van het apparaat.

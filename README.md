@@ -8,6 +8,7 @@ Open `index.html` in een browser (of zet de repo op GitHub Pages). Er is geen in
 
 - **Vandaag**: break-even kWh-prijs, prijsbord (laadpaal / Euro95 / Euro98) en de kosten van vier opties voor het aantal km dat je instelt.
 - **Logboek**: vul per dag gereden km, geladen kWh en tarief in. De app rekent de kosten met laden, alleen Euro95 en alleen Euro98 uit, plus de besparing per dag en opgeteld (grafieken + tabel).
+- **ANWB-factuur inlezen**: kies de maandelijkse factuurspecificatie (PDF) van ANWB. Alle laadsessies worden per dag opgeteld (kWh en kosten incl. btw) en in het logboek gezet, met de CBS-dagprijs van Euro95 voor die dag. Opnieuw inlezen geeft geen dubbele dagen. Het PDF-bestand wordt alleen in de browser gelezen.
 - **Instellingen**: verbruik, laadtarief, starttarief, accugrootte en prijzen aanpassen.
 
 Gegevens worden opgeslagen in de browser (`localStorage`) van het apparaat waarop je de app gebruikt.
