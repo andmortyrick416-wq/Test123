@@ -20,9 +20,11 @@ Gegevens worden opgeslagen in de browser (`localStorage`) van het apparaat waaro
 
 ## Rekenmethode
 
-- Elektrische km = geladen kWh ÷ stroomverbruik (kWh/100 km, gemeten vanaf de paal), maximaal de gereden km.
+- Stroomverbruik = kWh per volle lading ÷ elektrisch bereik (45 km volgens het dashboard van de Formentor).
+- Elektrische km = geladen kWh ÷ stroomverbruik, maximaal de gereden km.
+- Rijmodus-advies: per rit (afstand, stad/gemengd/snelweg, accu bij vertrek) vergelijkt de app slim schakelen (E-Mode in de stad, Hybride op de snelweg), niet schakelen en alleen benzine. Verbruik per wegtype is een schatting: elektrisch stad 0,85× en snelweg 1,25× het gemiddelde, benzine stad 1,08× en snelweg 0,95×.
 - Kosten met laden = kWh × tarief + starttarief + benzine voor de resterende km.
 - Besparing = kosten alleen benzine − kosten met laden.
 - Break-even kWh-prijs = benzineverbruik × benzineprijs ÷ stroomverbruik.
 
-Standaardwaarden (aanpasbaar): 20 kWh/100 km, 6,6 l/100 km met lege accu, 11 kWh per volle laadbeurt, €0,39/kWh.
+Standaardwaarden (aanpasbaar): 45 km elektrisch bereik, 11,3 kWh per volle laadbeurt, 6,6 l/100 km met lege accu, €0,39/kWh.

@@ -143,6 +143,20 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30p
 input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 4px 12px rgba(20, 40, 90, 0.3); }
 
 .rows { display: grid; gap: 14px; }
+.seg.in-card { background: var(--inset); border: 0; }
+.seg.in-card button { height: 34px; font-size: 14px; }
+.mode-head { display: flex; gap: 12px; align-items: center; }
+.mode-head .ic { width: 44px; height: 44px; border-radius: 14px; background: var(--inset); color: var(--accent); display: grid; place-items: center; flex: none; }
+.mode-head .ic svg { width: 22px; height: 22px; }
+.mode-head .eyebrow-s { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-3); }
+.mode-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
+.strat { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border-radius: 16px; background: var(--inset); }
+.strat.best { box-shadow: inset 0 0 0 2px var(--laden); }
+.strat b { font-size: 15px; font-weight: 700; }
+.strat .c { font-size: 15px; font-weight: 700; text-align: right; }
+.strat .m { font-size: 12px; color: var(--fg-3); }
+.strat .tag { font-size: 11px; font-weight: 700; color: var(--laden); text-align: right; }
+.derived { font-size: 13px; color: var(--fg-2); padding: 10px 12px; border-radius: 14px; background: var(--inset); }
 .row { display: grid; gap: 6px; }
 .row .top { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
 .row .top span:first-child { font-weight: 600; }
@@ -286,6 +300,26 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
         <output for="kmToday" class="num" id="kmTodayOut"></output>
       </div>
       <input type="range" id="kmToday" min="5" max="200" step="5">
+      <div class="seg in-card" role="group" aria-label="Soort rit">
+        <button type="button" data-route="stad">Stad</button>
+        <button type="button" data-route="gemengd">Gemengd</button>
+        <button type="button" data-route="snelweg">Snelweg</button>
+      </div>
+      <div class="km-head">
+        <label for="soc">Accu bij vertrek</label>
+        <output for="soc" class="num" id="socOut"></output>
+      </div>
+      <input type="range" id="soc" min="0" max="100" step="10">
+    </section>
+
+    <section class="g card" aria-labelledby="h-mode">
+      <div class="mode-head">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M10.3 11 3.5 9.5M13.7 11l6.8-1.5"/></svg></span>
+        <div><div class="eyebrow-s">Rijmodus-advies</div><h2 id="h-mode"></h2></div>
+      </div>
+      <p class="sub" id="modeText"></p>
+      <div class="rows" id="modeRows" style="gap:8px"></div>
+      <p class="meta" style="font-size:12px;color:var(--fg-3)">Laat de motor de accu niet opladen (accu laden in Hybride-modus). Stroom uit benzine is vrijwel altijd duurder dan stroom uit de laadpaal.</p>
     </section>
 
     <section class="g card">
@@ -408,11 +442,12 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     <section class="g card">
       <h2>Auto en ritten</h2>
       <div class="form">
-        <div class="field"><label for="sElec">Stroom kWh/100 km</label><input type="number" inputmode="decimal" id="sElec" step="0.1" min="1"><span class="hint">Vanaf de paal, incl. laadverlies</span></div>
+        <div class="field"><label for="sRange">Elektrisch bereik (km)</label><input type="number" inputmode="decimal" id="sRange" step="1" min="5"><span class="hint">Bij volle accu, zoals het dashboard aangeeft</span></div>
         <div class="field"><label for="sFuel">Benzine l/100 km</label><input type="number" inputmode="decimal" id="sFuel" step="0.1" min="1"><span class="hint">Met lege accu</span></div>
-        <div class="field"><label for="sBatt">kWh per volle lading</label><input type="number" inputmode="decimal" id="sBatt" step="0.1" min="1"><span class="hint">Wat de paal meet bij 0→100%</span></div>
+        <div class="field"><label for="sBatt">kWh per volle lading</label><input type="number" inputmode="decimal" id="sBatt" step="0.1" min="1"><span class="hint">Wat de paal meet bij 0→100%, bijv. je grootste sessie op de factuur</span></div>
         <div class="field"><label for="sKmDay">Standaard km per dag</label><input type="number" inputmode="decimal" id="sKmDay" step="1" min="1"></div>
       </div>
+      <p class="derived" id="derived"></p>
     </section>
 
     <section class="g card">
@@ -430,7 +465,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
 
     <div class="foot">
       <p>Euro95: landelijk gemiddelde pompprijs van het CBS (dataset 80416ned, een paar dagen vertraging). Het CBS publiceert geen Euro98; die prijs is Euro95 plus de toeslag, tenzij je hem zelf invult.</p>
-      <p>Rekenmethode: elektrische km = geladen kWh ÷ stroomverbruik. Besparing = benzine voor die km − laadkosten. Alle gegevens blijven in deze browser op dit apparaat.</p>
+      <p>Rekenmethode: stroomverbruik = kWh per volle lading ÷ elektrisch bereik. Elektrische km = geladen kWh ÷ stroomverbruik, nooit meer dan wat je die dag geladen hebt. Besparing = benzine voor die km − laadkosten. Alle gegevens blijven in deze browser op dit apparaat.</p>
     </div>
 
     <section class="g card" aria-labelledby="h-theme">
@@ -462,7 +497,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
   const DEFAULTS = {
     p95: 2.049, p98: null, premium98: 0.14, p95Date: null, p95Source: "voorbeeldprijs",
     kwh: 0.39, start: 0,
-    elec: 20.0, fuel: 6.6, batt: 11.0, kmDay: 40, cmp: "95"
+    range: 45, fuel: 6.6, batt: 11.3, kmDay: 40, cmp: "95", route: "gemengd"
   };
   const KEY_S = "lot.settings.v1", KEY_L = "lot.log.v1";
 
@@ -473,7 +508,9 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
 
   let S = Object.assign({}, DEFAULTS, store.get(KEY_S) || {});
   let log = store.get(KEY_L) || [];
+  delete S.elec; // vervangen door bereik + accu (versie met vast stroomverbruik)
   let kmToday = S.kmDay;
+  let soc = 100;
   let viewMonth = null;
 
   const $ = (id) => document.getElementById(id);
@@ -497,11 +534,41 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
   const saveL = () => store.set(KEY_L, log);
   const is98 = () => S.cmp === "98";
 
+  // ---------- Rijprofiel ----------
+  // Het dashboard toont het elektrische bereik met een volle accu (45 km). Het
+  // gemiddelde stroomverbruik vanaf de paal is dus: kWh per volle lading ÷ bereik.
+  const elec = () => S.batt * 100 / S.range; // kWh per 100 km
+  // Geschat verschil per wegtype t.o.v. het gemiddelde: elektrisch rijden is zuinig
+  // in de stad en onzuinig op de snelweg, de benzinemotor juist andersom.
+  const PROFILE = { stad: { e: 0.85, f: 1.08 }, snelweg: { e: 1.25, f: 0.95 } };
+  const ROUTES = { stad: 0.1, gemengd: 0.5, snelweg: 0.85 }; // aandeel snelweg-km
+
+  // Kosten van één rit bij drie manieren van rijden.
+  // auto:   E-Mode/Hybride zonder schakelen, de accu raakt gelijkmatig over de rit leeg.
+  // slim:   accu eerst voor de stads-km, op de snelweg alleen elektrisch als dat goedkoper is.
+  // petrol: zonder stroom (lege accu).
+  function tripCalc(km, h, socFrac, pf) {
+    const ec = elec() / 100 * PROFILE.stad.e, eh = elec() / 100 * PROFILE.snelweg.e;
+    const fc = S.fuel / 100 * PROFILE.stad.f, fh = S.fuel / 100 * PROFILE.snelweg.f;
+    const kc = km * (1 - h), kh = km * h, battery = S.batt * socFrac;
+    const result = (eKc, eKh) => {
+      const kwh = eKc * ec + eKh * eh, litres = (kc - eKc) * fc + (kh - eKh) * fh;
+      const chargeCost = kwh * S.kwh + (kwh > 0.05 ? S.start : 0);
+      return { elecKm: eKc + eKh, kwh, litres, chargeCost, fuelCost: litres * pf, cost: chargeCost + litres * pf, left: Math.max(0, battery - kwh) };
+    };
+    const need = kc * ec + kh * eh;
+    const r = need > 0 ? Math.min(1, battery / need) : 0;
+    const cityPays = ec * S.kwh < fc * pf, hwPays = eh * S.kwh < fh * pf;
+    const sc = cityPays ? Math.min(kc, battery / ec) : 0;
+    const sh = hwPays ? Math.min(kh, Math.max(0, battery - sc * ec) / eh) : 0;
+    return { auto: result(kc * r, kh * r), slim: result(sc, sh), petrol: result(0, 0), kc, kh, need, battery, cityPays, hwPays, ec, eh, fc, fh, pf };
+  }
+
   // ---------- Rekenkern ----------
   // Eén dag: hoeveel km elektrisch, wat kost laden, wat kost het alternatief.
   // Zonder ingevulde km (dag uit een factuur) gaan we uit van alleen elektrische km.
   function dayCalc(e) {
-    const kwhKm = e.kwh * 100 / S.elec;
+    const kwhKm = e.kwh * 100 / elec();
     const km = e.km == null ? kwhKm : e.km;
     const elecKm = Math.min(km, kwhKm);
     const restKm = Math.max(0, km - elecKm);
@@ -514,12 +581,26 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     return { km, elecKm, restKm, chargeCost, only95, only98, mix95, mix98, save95: only95 - mix95, save98: only98 - mix98 };
   }
 
-  // Planning voor vandaag: volle accu, rest op benzine.
+  // Planning voor vandaag: de rit met de slimste rijmodus, voor Euro95 en Euro98.
   function planToday(km) {
-    const rangeKm = S.batt * 100 / S.elec;
-    const elecKm = Math.min(km, rangeKm);
-    const kwh = elecKm * S.elec / 100;
-    return dayCalc({ km, kwh, tarief: S.kwh, start: S.start, p95: S.p95, p98: p98Now() });
+    const h = ROUTES[S.route] != null ? ROUTES[S.route] : ROUTES.gemengd;
+    return { t95: tripCalc(km, h, soc / 100, S.p95), t98: tripCalc(km, h, soc / 100, p98Now()) };
+  }
+
+  // Advies in woorden, plus de varianten om te vergelijken.
+  function modeAdvice(t, km, fuelName) {
+    const ct = (v) => n1.format(v * 100) + " ct";
+    const pct = (kwh) => n0.format(Math.max(0, t.battery - kwh) / S.batt * 100) + "%";
+    const allElectric = t.need <= t.battery + 1e-6;
+    const gain = t.auto.cost - t.slim.cost;
+    if (t.battery < 0.05) return { title: "Hybride, de accu is leeg", text: "Zonder lading rijdt de auto als gewone hybride. Laad vanavond weer op." };
+    if (!t.cityPays) return { title: "Rijd Hybride", text: "Bij " + eur3.format(S.kwh) + "/kWh is elektrisch rijden duurder dan " + fuelName + ", ook in de stad (" + ct(t.ec * S.kwh) + " tegen " + ct(t.fc * t.pf) + " per km). Zoek een goedkopere laadpaal." };
+    // Schakelen loont pas vanaf € 0,25 per rit; kleinere verschillen vallen binnen de onzekerheid van de schatting.
+    if (allElectric && (t.hwPays || gain < 0.25)) return { title: "Zet E-Mode aan", text: "De hele rit van " + km + " km kan elektrisch. Je komt aan met ongeveer " + pct(t.auto.kwh) + " accu." +
+      (!t.hwPays && t.kh >= 0.5 ? " Op de snelweg is elektrisch rijden nu ongeveer even duur als benzine; daar Hybride kiezen scheelt hooguit " + eur.format(Math.max(0, gain)) + "." : "") };
+    if (!t.hwPays && t.kh >= 0.5 && gain >= 0.25) return { title: "Snelweg Hybride, stad E-Mode", text: "Op de snelweg kost elektrisch rijden " + ct(t.eh * S.kwh) + " per km, " + fuelName + " " + ct(t.fh * t.pf) + ". Kies daar Hybride en houd de accu vast; zet E-Mode aan zodra je de stad in rijdt." + (gain >= 0.01 ? " Scheelt " + eur.format(gain) + " op deze rit." : "") };
+    if (gain >= 0.25) return { title: "Bewaar de accu voor de stad", text: "De accu is niet genoeg voor de hele rit (±" + n0.format(t.battery / (t.need / km)) + " van " + km + " km). Rijd op de snelweg Hybride en schakel in de stad naar E-Mode. Dat scheelt " + eur.format(gain) + " ten opzichte van niet schakelen." };
+    return { title: "E-Mode, daarna vanzelf Hybride", text: "Rij elektrisch tot de accu leeg is (±" + n0.format(Math.min(km, t.battery / (t.need / km))) + " km); daarna schakelt de auto zelf naar hybride. Slim schakelen levert op deze rit minder dan € 0,25 op." };
   }
 
   // ---------- Voorbeelddata ----------
@@ -530,7 +611,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
       const d = new Date(today); d.setDate(d.getDate() - i - 1);
       const km = kms[13 - i];
       if (!km) continue;
-      const kwh = Math.min(S.batt, +(km * S.elec / 100).toFixed(1));
+      const kwh = Math.min(S.batt, +(km * elec() / 100).toFixed(1));
       const wobble = Math.sin(i * 1.3) * 0.03;
       out.push({ date: iso(d), km, kwh, tarief: S.kwh, start: S.start, p95: +(S.p95 + wobble).toFixed(3), p98: +(p98Now() + wobble).toFixed(3), who: i % 3 ? "Ik" : "Partner", example: true });
     }
@@ -548,10 +629,11 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     $("todayDate").textContent = dHead.format(new Date());
     const fuelName = is98() ? "Euro98" : "Euro95";
     const price = is98() ? p98Now() : S.p95;
-    const be = (S.fuel * price) / S.elec;
-    const p = planToday(kmToday);
-    const save = is98() ? p.save98 : p.save95;
-    const other = is98() ? p.save95 : p.save98;
+    const be = (S.fuel * price) / elec();
+    const plan = planToday(kmToday);
+    const t = is98() ? plan.t98 : plan.t95, tOther = is98() ? plan.t95 : plan.t98;
+    const save = t.petrol.cost - t.slim.cost;
+    const other = tOther.petrol.cost - tOther.slim.cost;
     const wins = save >= 0;
 
     const chip = $("verdictChip");
@@ -560,7 +642,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     const big = $("verdictBig");
     big.className = "big num " + (wins ? "" : "bad");
     big.textContent = eur.format(Math.abs(save));
-    $("verdictSub").innerHTML = (wins ? "goedkoper" : "duurder") + " dan " + fuelName + " bij " + kmToday + " km<br>" +
+    $("verdictSub").innerHTML = (wins ? "goedkoper" : "duurder") + " dan alleen " + fuelName + " bij " + kmToday + " km<br>" +
       eur.format(Math.abs(other)) + " " + (other >= 0 ? "goedkoper" : "duurder") + " dan " + (is98() ? "Euro95" : "Euro98");
 
     const share = Math.min(1, S.kwh / be);
@@ -576,14 +658,36 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     slider.value = kmToday;
     slider.style.setProperty("--fill", ((kmToday - slider.min) / (slider.max - slider.min) * 100).toFixed(1) + "%");
     $("kmTodayOut").textContent = kmToday + " km";
+    $$("[data-route]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.route === S.route)));
+    const socEl = $("soc");
+    socEl.value = soc;
+    socEl.style.setProperty("--fill", soc + "%");
+    $("socOut").textContent = soc + "% · ±" + n0.format(S.range * soc / 100) + " km";
 
-    const mix = is98() ? p.mix98 : p.mix95;
+    // Rijmodus-advies
+    const adv = modeAdvice(t, kmToday, fuelName);
+    $("h-mode").textContent = adv.title;
+    $("modeText").textContent = adv.text;
+    const same = Math.abs(t.auto.cost - t.slim.cost) < 0.005;
+    const strats = (t.battery < 0.05 ? [] : same
+      ? [{ name: "E-Mode tot de accu leeg is", r: t.slim }]
+      : [{ name: "Slim schakelen", sub: "stad E-Mode, snelweg Hybride", r: t.slim }, { name: "Niet schakelen", sub: "accu raakt onderweg leeg", r: t.auto }])
+      .concat([{ name: "Alleen " + fuelName, sub: "zonder stroom", r: t.petrol }]);
+    const bestCost = Math.min(...strats.map(x => x.r.cost));
+    $("modeRows").innerHTML = strats.map(x => {
+      const best = Math.abs(x.r.cost - bestCost) < 0.005;
+      return '<div class="strat' + (best ? " best" : "") + '"><b>' + x.name + '</b><span class="c num">' + eur.format(x.r.cost) + '</span>' +
+        '<span class="m num">' + (x.sub ? x.sub + " · " : "") + n0.format(x.r.elecKm) + " km elektrisch · " + n1.format(x.r.litres) + ' l</span>' +
+        '<span class="tag">' + (best ? "Goedkoopst" : "+" + eur.format(x.r.cost - bestCost)) + '</span></div>';
+    }).join("");
+
     const fuelCol = is98() ? "var(--e98)" : "var(--e95)";
+    const p95only = plan.t95.petrol.cost, p98only = plan.t98.petrol.cost;
     const rows = [
-      { name: "Laden + rest " + fuelName, total: mix, parts: [[p.chargeCost, "var(--laden)"], [mix - p.chargeCost, fuelCol]],
-        meta: n0.format(p.elecKm) + " km elektrisch" + (p.restKm > 0.5 ? " · " + n0.format(p.restKm) + " km op " + fuelName : "") },
-      { name: "Alleen Euro95", total: p.only95, parts: [[p.only95, "var(--e95)"]], meta: eur.format(p.only95 / kmToday * 100) + " per 100 km" },
-      { name: "Alleen Euro98", total: p.only98, parts: [[p.only98, "var(--e98)"]], meta: eur.format(p.only98 / kmToday * 100) + " per 100 km" }
+      { name: "Laden + rest " + fuelName, total: t.slim.cost, parts: [[t.slim.chargeCost, "var(--laden)"], [t.slim.fuelCost, fuelCol]],
+        meta: n0.format(t.slim.elecKm) + " van " + kmToday + " km elektrisch" + (t.slim.litres > 0.05 ? " · " + n1.format(t.slim.litres) + " l " + fuelName : "") },
+      { name: "Alleen Euro95", total: p95only, parts: [[p95only, "var(--e95)"]], meta: eur.format(p95only / kmToday * 100) + " per 100 km" },
+      { name: "Alleen Euro98", total: p98only, parts: [[p98only, "var(--e98)"]], meta: eur.format(p98only / kmToday * 100) + " per 100 km" }
     ];
     const max = Math.max(...rows.map(r => r.total)) || 1;
     $("rows").innerHTML = rows.map(r =>
@@ -599,7 +703,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     $("p98").textContent = eur3.format(p98Now());
     $("p98Src").textContent = S.p98 ? "handmatig" : "E95 + " + eur.format(S.premium98).replace(/\s/g, "");
 
-    const perE = S.elec / 100 * S.kwh * 100, per95 = S.fuel / 100 * S.p95 * 100, per98 = S.fuel / 100 * p98Now() * 100;
+    const perE = elec() / 100 * S.kwh * 100, per95 = S.fuel / 100 * S.p95 * 100, per98 = S.fuel / 100 * p98Now() * 100;
     $("perKm").innerHTML = "Per km: elektrisch <b class='num'>" + n1.format(perE) + " ct</b>, Euro95 <b class='num'>" + n1.format(per95) + " ct</b>, Euro98 <b class='num'>" + n1.format(per98) + " ct</b>. " +
       "Laad je elke dag zo, dan is dat ongeveer <b class='num'>" + signed(save * 30) + "</b> per maand.";
   }
@@ -721,7 +825,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
   function renderAll(resetForm) {
     const ex = !log.length;
     $$("[data-example]").forEach(n => { n.hidden = !ex; });
-    renderToday(); renderMonth(); renderSessions();
+    renderToday(); renderMonth(); renderSessions(); renderDerived();
     if (resetForm) fillEntryDefaults();
   }
 
@@ -751,9 +855,14 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
     $("f95").value = S.p95;
     $("f98").value = +p98Now().toFixed(3);
   }
+  function renderDerived() {
+    $("derived").textContent = "Stroomverbruik: " + n1.format(elec()) + " kWh/100 km gemiddeld (" + n1.format(S.batt) + " kWh ÷ " + n0.format(S.range) + " km). " +
+      "Geschat: stad ±" + n1.format(elec() * PROFILE.stad.e) + ", snelweg ±" + n1.format(elec() * PROFILE.snelweg.e) + " kWh/100 km. " +
+      "Laden loont tot " + eur3.format(S.fuel * S.p95 / elec()) + "/kWh (Euro95).";
+  }
   function fillSettings() {
     $("sP95").value = S.p95; $("sP98").value = S.p98 || ""; $("s98Premium").value = S.premium98;
-    $("sKwh").value = S.kwh; $("sStart").value = S.start; $("sElec").value = S.elec; $("sFuel").value = S.fuel;
+    $("sKwh").value = S.kwh; $("sStart").value = S.start; $("sRange").value = S.range; $("sFuel").value = S.fuel;
     $("sBatt").value = S.batt; $("sKmDay").value = S.kmDay;
   }
   const num = (id) => { const v = parseFloat(String($(id).value).replace(",", ".")); return isNaN(v) ? null : v; };
@@ -793,10 +902,12 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
 
   $$("[data-cmp]").forEach(b => b.addEventListener("click", () => { S.cmp = b.dataset.cmp; saveS(); renderAll(false); }));
   $("kmToday").addEventListener("input", (ev) => { kmToday = +ev.target.value; renderToday(); });
+  $("soc").addEventListener("input", (ev) => { soc = +ev.target.value; renderToday(); });
+  $$("[data-route]").forEach(b => b.addEventListener("click", () => { S.route = b.dataset.route; saveS(); renderToday(); }));
   $("prevMonth").addEventListener("click", () => { const ms = months(); viewMonth = ms[Math.max(0, ms.indexOf(viewMonth) - 1)]; renderMonth(); });
   $("nextMonth").addEventListener("click", () => { const ms = months(); viewMonth = ms[Math.min(ms.length - 1, ms.indexOf(viewMonth) + 1)]; renderMonth(); });
 
-  const settingMap = { sP95: "p95", sP98: "p98", s98Premium: "premium98", sKwh: "kwh", sStart: "start", sElec: "elec", sFuel: "fuel", sBatt: "batt", sKmDay: "kmDay" };
+  const settingMap = { sP95: "p95", sP98: "p98", s98Premium: "premium98", sKwh: "kwh", sStart: "start", sRange: "range", sFuel: "fuel", sBatt: "batt", sKmDay: "kmDay" };
   Object.keys(settingMap).forEach(id => $(id).addEventListener("input", () => {
     const k = settingMap[id], v = num(id);
     if (k === "p98") S.p98 = v && v > 0 ? v : null;
