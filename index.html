@@ -5,351 +5,453 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Laden of tanken?</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#e6ecf5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <script>
   // Thema vóór het tekenen zetten, zodat er geen flits van het verkeerde thema is.
   try { const t = localStorage.getItem("lot.theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
 </script>
 <style>
-/* Layout: één kolom dashboard — bovenaan het antwoord voor vandaag, daaronder logboek, grafieken en instellingen. */
+/* Layout: één smalle kolom zoals een telefoon-app, glaskaarten op een kleurrijke wazige achtergrond, zwevende tabbalk onderin. */
 :root {
-  --bg: #f3f5f7;
-  --surface: #ffffff;
-  --surface-2: #e9edf1;
-  --line: #d5dce3;
-  --fg: #111a22;
-  --fg-2: #4a5866;
-  --fg-3: #74828f;
-  --accent: #1f5fae;
-  --accent-ink: #ffffff;
-  --s-laden: #2a78d6;
-  --s-e95: #eb6834;
-  --s-e98: #1baf7a;
-  --good: #0f7a3d;
-  --good-bg: #e2f3e8;
-  --bad: #b3261e;
-  --bad-bg: #fbe5e3;
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 10px;
+  --bg: #e6ecf5;
+  --blob-1: #4d86ff; --blob-2: #20c7b2; --blob-3: #ff9a52; --blob-o: 0.7;
+  --glass: rgba(255, 255, 255, 0.36);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-line: rgba(255, 255, 255, 0.72);
+  --glass-hi: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 10px 30px rgba(28, 46, 92, 0.14);
+  --inset: rgba(255, 255, 255, 0.5);
+  --fg: #0d1626;
+  --fg-2: #33415c;
+  --fg-3: #56637d;
+  --accent: #1d5fd6;
+  --laden: #2f6cf2;
+  --e95: #e8692a;
+  --e98: #0f9b6e;
+  --good: #0b6b41; --good-bg: rgba(18, 148, 92, 0.16);
+  --bad: #b3261e; --bad-bg: rgba(200, 50, 40, 0.14);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", Figtree, system-ui, "Segoe UI", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", Figtree, system-ui, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1418; --surface: #182027; --surface-2: #212b34; --line: #2f3b46;
-    --fg: #eef2f5; --fg-2: #b4c0cb; --fg-3: #8593a0;
-    --accent: #6aa6ee; --accent-ink: #0b1622;
-    --s-laden: #3987e5; --s-e95: #d95926; --s-e98: #199e70;
-    --good: #5fd18f; --good-bg: #13301f; --bad: #ff8a80; --bad-bg: #3a1714;
+    --bg: #0a0f1c;
+    --blob-1: #2f5fe0; --blob-2: #0e9c8a; --blob-3: #c4561c; --blob-o: 0.45;
+    --glass: rgba(30, 38, 58, 0.48);
+    --glass-strong: rgba(70, 82, 110, 0.85);
+    --glass-line: rgba(255, 255, 255, 0.12);
+    --glass-hi: rgba(255, 255, 255, 0.16);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --inset: rgba(255, 255, 255, 0.08);
+    --fg: #eef2fa; --fg-2: #c2cbdc; --fg-3: #95a1b8;
+    --accent: #8fb4ff;
+    --laden: #5b8cff; --e95: #ff8a4c; --e98: #2ccf98;
+    --good: #5fd99a; --good-bg: rgba(60, 200, 130, 0.16);
+    --bad: #ff8a80; --bad-bg: rgba(255, 110, 100, 0.16);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1418; --surface: #182027; --surface-2: #212b34; --line: #2f3b46;
-  --fg: #eef2f5; --fg-2: #b4c0cb; --fg-3: #8593a0;
-  --accent: #6aa6ee; --accent-ink: #0b1622;
-  --s-laden: #3987e5; --s-e95: #d95926; --s-e98: #199e70;
-  --good: #5fd18f; --good-bg: #13301f; --bad: #ff8a80; --bad-bg: #3a1714;
+  --bg: #0a0f1c;
+  --blob-1: #2f5fe0; --blob-2: #0e9c8a; --blob-3: #c4561c; --blob-o: 0.45;
+  --glass: rgba(30, 38, 58, 0.48);
+  --glass-strong: rgba(70, 82, 110, 0.85);
+  --glass-line: rgba(255, 255, 255, 0.12);
+  --glass-hi: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --inset: rgba(255, 255, 255, 0.08);
+  --fg: #eef2fa; --fg-2: #c2cbdc; --fg-3: #95a1b8;
+  --accent: #8fb4ff;
+  --laden: #5b8cff; --e95: #ff8a4c; --e98: #2ccf98;
+  --good: #5fd99a; --good-bg: rgba(60, 200, 130, 0.16);
+  --bad: #ff8a80; --bad-bg: rgba(255, 110, 100, 0.16);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--fg);
-  font: 15px/1.5 var(--font-body);
-}
-.wrap {
-  max-width: 1040px; margin: 0 auto;
-  padding-block: 28px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 28px;
-}
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
-h2 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
-h3 { font-size: 1rem; font-weight: 500; }
+[hidden] { display: none !important; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 var(--font); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.num { font-variant-numeric: tabular-nums; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); text-wrap: balance; }
 p { margin: 0; }
-.num, .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); font-weight: 600; }
-.muted { color: var(--fg-2); }
-.small { font-size: 0.85rem; }
+button { font: inherit; color: inherit; }
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-header.top { display: grid; gap: 10px; }
-header.top .car { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--fg-2); font-size: 0.9rem; }
-header.top .car span::before { content: "·"; margin-right: 14px; color: var(--fg-3); }
-header.top .car span:first-child::before { content: none; }
+/* Achtergrond */
+.backdrop { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+.backdrop i { position: absolute; border-radius: 50%; opacity: var(--blob-o); }
+.backdrop i:nth-child(1) { width: 440px; height: 440px; left: -160px; top: -130px; background: var(--blob-1); filter: blur(70px); }
+.backdrop i:nth-child(2) { width: 380px; height: 380px; right: -170px; top: 26%; background: var(--blob-2); filter: blur(80px); }
+.backdrop i:nth-child(3) { width: 400px; height: 400px; left: -70px; bottom: -160px; background: var(--blob-3); filter: blur(90px); }
 
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 18px; min-width: 0; }
-.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
-
-/* Verdict */
-.verdict { display: grid; gap: 14px; }
-.pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 0.92rem; width: fit-content; }
-.pill.good { background: var(--good-bg); color: var(--good); }
-.pill.bad { background: var(--bad-bg); color: var(--bad); }
-.pill svg { width: 16px; height: 16px; flex: none; }
-.verdict-line { font-family: var(--font-display); font-size: clamp(1.25rem, 3.2vw, 1.7rem); font-weight: 500; line-height: 1.25; max-width: 40ch; }
-.verdict-line strong { font-weight: 700; }
-
-/* Prijsbord */
-.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
-.price { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 6px; background: var(--surface-2); }
-.price .head { display: flex; align-items: center; gap: 10px; }
-.fuel-tag { width: 34px; height: 34px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; font: 600 0.72rem var(--font-data); flex: none; }
-.plug-tag { width: 34px; height: 34px; border-radius: 6px; border: 2px solid currentColor; display: grid; place-items: center; flex: none; }
-.plug-tag svg { width: 18px; height: 18px; }
-.price .val { font: 500 1.6rem var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-.price .val small { font-size: 0.8rem; color: var(--fg-3); margin-left: 4px; letter-spacing: 0; }
-.price .src { font-size: 0.78rem; color: var(--fg-3); }
-
-/* Km-schuif */
-.km-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; }
-.km-row label { font-weight: 600; }
-.km-out { font: 500 1.2rem var(--font-data); }
-input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
-
-/* Opties */
-.options { display: grid; gap: 10px; }
-.opt { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 6px 16px; align-items: center; }
-.opt .name { display: flex; align-items: center; gap: 8px; font-weight: 500; min-width: 0; }
-.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
-.opt .bar { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; display: flex; gap: 2px; }
-.opt .bar i { display: block; height: 100%; }
-.opt .bar i:last-child { border-radius: 0 4px 4px 0; }
-.opt .cost { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; min-width: 92px; }
-.opt .cost b { font-weight: 500; font-size: 1.05rem; }
-.opt .cost div { font-size: 0.75rem; color: var(--fg-3); }
-.opt .sub { grid-column: 1 / -1; font-size: 0.8rem; color: var(--fg-3); margin-top: -4px; }
-@media (max-width: 560px) {
-  .opt { grid-template-columns: 1fr auto; }
-  .opt .bar { grid-column: 1 / -1; grid-row: 2; }
+/* Glas */
+.g {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(26px) saturate(190%); backdrop-filter: blur(26px) saturate(190%);
+  border: 1px solid var(--glass-line);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--glass-shadow);
 }
+.card { border-radius: 26px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.card.hero { border-radius: 30px; padding: 18px; }
 
-/* Tegels */
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
-.tile { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 4px; align-content: start; }
-.tile .v { font: 500 1.45rem var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-.tile .v.good { color: var(--good); }
-.tile .v.bad { color: var(--bad); }
-.tile .d { font-size: 0.8rem; color: var(--fg-3); }
+.app {
+  position: relative; z-index: 1;
+  max-width: 560px; margin: 0 auto;
+  padding-block: 28px 128px;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+}
+.view { display: grid; gap: 14px; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-top: 18px; }
+.head .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-2); }
+.head h1 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.head-actions { display: flex; gap: 8px; }
+.round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; padding: 0; color: var(--fg); }
+.round svg { width: 20px; height: 20px; }
+.round:disabled { opacity: 0.4; cursor: default; }
+
+/* Hero vandaag */
+.verdict { display: flex; gap: 16px; align-items: center; }
+.verdict .text { flex: 1; display: grid; gap: 6px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.chip svg { width: 14px; height: 14px; }
+.chip.good { background: var(--good-bg); color: var(--good); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.big { font-family: var(--font-display); font-size: 46px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.big.good { color: var(--good); }
+.big.bad { color: var(--bad); }
+.sub { font-size: 14px; color: var(--fg-2); line-height: 1.35; }
+.ring { width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.ring > div { width: 88px; height: 88px; border-radius: 50%; background: var(--glass-strong); display: grid; place-content: center; text-align: center; gap: 1px; }
+.ring b { font-size: 17px; font-weight: 800; }
+.ring span { font-size: 10.5px; color: var(--fg-3); line-height: 1.2; }
+
+.seg { border-radius: 999px; padding: 4px; display: flex; gap: 4px; }
+.seg button { flex: 1; height: 38px; border: 0; border-radius: 999px; background: transparent; font-weight: 600; font-size: 15px; color: var(--fg-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--glass-strong); color: var(--fg); box-shadow: 0 2px 8px rgba(20, 40, 90, 0.15); }
+
+.km-head { display: flex; justify-content: space-between; align-items: baseline; }
+.km-head label { font-size: 15px; font-weight: 600; }
+.km-head output { font-size: 22px; font-weight: 800; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--laden) 0 var(--fill, 20%), var(--inset) var(--fill, 20%) 100%); outline-offset: 6px; margin: 10px 0; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 4px 12px rgba(20, 40, 90, 0.3); cursor: grab; }
+input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 4px 12px rgba(20, 40, 90, 0.3); }
+
+.rows { display: grid; gap: 14px; }
+.row { display: grid; gap: 6px; }
+.row .top { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
+.row .top span:first-child { font-weight: 600; }
+.row .top b { font-weight: 700; }
+.row .bar { height: 10px; border-radius: 999px; background: var(--inset); overflow: hidden; display: flex; gap: 2px; }
+.row .bar i { display: block; height: 100%; }
+.row .bar i:first-child { border-radius: 999px 0 0 999px; }
+.row .bar i:last-child { border-radius: 0 999px 999px 0; }
+.row .bar i:only-child { border-radius: 999px; }
+.row .meta { font-size: 12px; color: var(--fg-3); }
+@media (prefers-reduced-motion: no-preference) { .row .bar i { transition: width 0.3s ease; } }
+
+.pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pill { border-radius: 18px; padding: 10px 12px; display: grid; gap: 1px; min-width: 0; }
+.pill .k { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+.pill .v { font-size: 16px; font-weight: 700; }
+.pill .s { font-size: 11px; color: var(--fg-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note { font-size: 13px; color: var(--fg-2); line-height: 1.45; padding: 0 4px; }
+
+/* Maand */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { padding: 10px; border-radius: 16px; background: var(--inset); display: grid; gap: 1px; min-width: 0; }
+.stat b { font-size: 16px; font-weight: 800; }
+.stat span { font-size: 11px; color: var(--fg-3); }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.chart-head h2 { font-size: 16px; font-weight: 700; }
+.chart-head span { font-size: 12px; color: var(--fg-3); }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart svg text { fill: var(--fg-3); font: 11px var(--font); }
+.chart .gridline { stroke: var(--fg-3); stroke-opacity: 0.2; }
+.chart .zero { stroke: var(--fg-3); stroke-opacity: 0.55; }
+.chart .hit { fill: transparent; cursor: pointer; }
+.detail { font-size: 13px; color: var(--fg-2); min-height: 18px; }
+.status-card { display: flex; align-items: center; gap: 12px; }
+.status-card .ic { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.status-card .ic svg { width: 20px; height: 20px; }
+.status-card .ic.good { background: var(--good-bg); color: var(--good); }
+.status-card .ic.bad { background: var(--bad-bg); color: var(--bad); }
+.status-card .ic.info { background: var(--inset); color: var(--accent); }
+.status-card .t { display: grid; gap: 2px; min-width: 0; font-size: 13px; color: var(--fg-2); }
+.status-card .t b { font-size: 14px; color: var(--fg); }
+.cta {
+  height: 54px; border-radius: 999px; border: 1px solid var(--glass-line); background: var(--laden); color: #fff;
+  font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 24px rgba(47, 108, 242, 0.35);
+}
+.cta svg { width: 20px; height: 20px; }
+.example { font-size: 13px; padding: 10px 14px; border-radius: 16px; color: var(--fg-2); }
+.example b { color: var(--fg); }
+
+/* Sessies */
+.list { border-radius: 26px; padding: 4px 16px; }
+.month-label { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--fg-2); padding: 6px 4px 0; display: flex; justify-content: space-between; }
+.month-label span:last-child { color: var(--good); }
+.item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--inset); }
+.item:last-child { border-bottom: 0; }
+.item .day { width: 40px; display: grid; justify-items: center; flex: none; }
+.item .day b { font-size: 18px; font-weight: 800; line-height: 1.1; }
+.item .day span { font-size: 11px; color: var(--fg-3); }
+.item .info { flex: 1; display: grid; min-width: 0; }
+.item .info b { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item .info span { font-size: 12px; color: var(--fg-3); }
+.item .amt { display: grid; justify-items: end; }
+.item .amt b { font-size: 15px; font-weight: 700; }
+.item .amt b.good { color: var(--good); }
+.item .amt b.bad { color: var(--bad); }
+.item .amt span { font-size: 12px; color: var(--fg-3); }
+.item .del { width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--fg-3); display: grid; place-items: center; cursor: pointer; flex: none; padding: 0; }
+.item .del:hover { color: var(--bad); background: var(--bad-bg); }
+.item .del svg { width: 17px; height: 17px; }
+.item.is-example { opacity: 0.75; }
 
 /* Formulieren */
-form.entry, .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.form .full { grid-column: 1 / -1; }
 .field { display: grid; gap: 4px; min-width: 0; }
-.field label { font-size: 0.8rem; color: var(--fg-2); font-weight: 500; }
+.field label { font-size: 13px; color: var(--fg-2); font-weight: 600; }
 .field input, .field select {
-  font: 0.95rem var(--font-data); font-variant-numeric: tabular-nums;
-  padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px;
-  background: var(--surface); color: var(--fg); width: 100%; min-width: 0;
+  height: 46px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--glass-line);
+  background: var(--inset); color: var(--fg); font: 500 16px var(--font); font-variant-numeric: tabular-nums; width: 100%; min-width: 0;
 }
-.field .hint { font-size: 0.74rem; color: var(--fg-3); }
-input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-button {
-  font: 600 0.9rem var(--font-body); border-radius: 8px; padding: 10px 14px; cursor: pointer;
-  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
-}
-button.ghost { background: transparent; color: var(--accent); }
-button.link { background: none; border: none; color: var(--fg-3); padding: 4px 6px; font-weight: 500; }
-button.link:hover { color: var(--bad); }
-.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.field .hint { font-size: 12px; color: var(--fg-3); }
+.btn { height: 46px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--glass-line); background: var(--glass-strong); color: var(--fg); font-weight: 600; font-size: 15px; cursor: pointer; }
+.btn.primary { background: var(--laden); color: #fff; }
+.btn.danger { color: var(--bad); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.small { font-size: 13px; color: var(--fg-2); }
+.card h2 { font-size: 17px; font-weight: 700; }
+.foot { font-size: 12px; color: var(--fg-3); line-height: 1.5; padding: 4px; display: grid; gap: 6px; }
 
-.import-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px; border: 1px dashed var(--line); border-radius: var(--r); }
-.import-row .status { flex: 1 1 260px; min-width: 0; font-size: 0.86rem; color: var(--fg-2); }
-.import-row .status.good { color: var(--good); }
-.import-row .status.bad { color: var(--bad); }
-.notice { font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); color: var(--fg-2); }
-.notice b { color: var(--fg); }
-
-/* Grafieken */
-.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
-.chart { display: grid; gap: 8px; min-width: 0; position: relative; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--fg-2); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
-.chart svg text { fill: var(--fg-3); font: 11px var(--font-data); }
-.chart .grid line { stroke: var(--line); stroke-width: 1; }
-.chart .zero { stroke: var(--fg-3); stroke-width: 1; }
-.tip {
-  position: absolute; pointer-events: none; background: var(--fg); color: var(--bg);
-  font: 0.78rem/1.4 var(--font-data); padding: 8px 10px; border-radius: 6px; white-space: nowrap; z-index: 5;
-  transform: translate(-50%, calc(-100% - 10px));
+/* Tabbalk */
+.tabs {
+  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%);
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  width: min(524px, calc(100% - 36px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  height: 66px; border-radius: 999px; display: flex; align-items: center; justify-content: space-around; padding: 0 6px;
 }
-.tip .row { display: flex; align-items: center; gap: 6px; }
+.tabs a { display: grid; justify-items: center; gap: 2px; text-decoration: none; color: var(--fg-2); font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; min-width: 64px; }
+.tabs a svg { width: 22px; height: 22px; }
+.tabs a[aria-current="page"] { color: var(--accent); background: var(--glass-strong); font-weight: 700; }
 
-/* Tabel */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 640px; }
-th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-th { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); font-weight: 600; }
-th:first-child, td:first-child { text-align: left; }
-td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-td.good { color: var(--good); }
-td.bad { color: var(--bad); }
-tr.example td { color: var(--fg-3); }
-details summary { cursor: pointer; font-weight: 600; }
-details[open] summary { margin-bottom: 14px; }
-footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-width: 75ch; }
-.theme-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
-.theme-toggle { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
-.theme-toggle button { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 999px; padding: 6px 14px; background: transparent; color: var(--fg-2); font-weight: 500; }
-.theme-toggle button svg { width: 15px; height: 15px; }
-.theme-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-@media (prefers-reduced-motion: no-preference) {
-  .opt .bar i { transition: width 0.35s ease; }
-}
+.toast { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); width: min(500px, calc(100% - 36px)); border-radius: 20px; padding: 12px 16px; font-size: 14px; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="backdrop" aria-hidden="true"><i></i><i></i><i></i></div>
+<input type="file" id="fileImport" accept="application/pdf,.pdf" hidden>
 
-  <header class="top">
-    <span class="label">Haarlem · openbaar laden vs. tanken</span>
-    <h1>Laden of tanken?</h1>
-    <div class="car"><span>Cupra Formentor VZ e-Hybrid 245 pk</span><span id="carSummary"></span></div>
-  </header>
+<main class="app">
 
   <!-- VANDAAG -->
-  <section class="panel" aria-labelledby="h-today">
-    <div class="section-head">
-      <h2 id="h-today">Vandaag</h2>
-      <span class="small muted" id="todayDate"></span>
+  <section class="view" id="view-vandaag" aria-labelledby="h-vandaag">
+    <div class="head">
+      <div>
+        <div class="eyebrow" id="todayDate"></div>
+        <h1 id="h-vandaag">Vandaag</h1>
+      </div>
+      <button class="g round" type="button" data-import aria-label="ANWB-factuur inlezen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      </button>
     </div>
 
-    <div class="verdict">
-      <span class="pill" id="verdictPill"></span>
-      <p class="verdict-line" id="verdictLine"></p>
+    <section class="g card hero verdict">
+      <div class="text">
+        <span class="chip" id="verdictChip"></span>
+        <span class="big num" id="verdictBig"></span>
+        <p class="sub" id="verdictSub"></p>
+      </div>
+      <div class="ring" id="ring" role="img"><div><b class="num" id="ringVal"></b><span id="ringSub"></span></div></div>
+    </section>
+
+    <div class="g seg" role="group" aria-label="Vergelijk met">
+      <button type="button" data-cmp="95">Euro95</button>
+      <button type="button" data-cmp="98">Euro98</button>
     </div>
 
-    <div class="board">
-      <div class="price">
-        <div class="head"><span class="plug-tag" style="color:var(--s-laden)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span class="label">Laadpaal</span></div>
-        <div class="val" id="pKwh"></div>
-        <div class="src" id="pKwhSrc"></div>
+    <section class="g card">
+      <div class="km-head">
+        <label for="kmToday">Ik rijd vandaag</label>
+        <output for="kmToday" class="num" id="kmTodayOut"></output>
       </div>
-      <div class="price">
-        <div class="head"><span class="fuel-tag" style="color:var(--s-e95)">E10</span><span class="label">Euro95</span></div>
-        <div class="val" id="p95"></div>
-        <div class="src" id="p95Src"></div>
-      </div>
-      <div class="price">
-        <div class="head"><span class="fuel-tag" style="color:var(--s-e98)">E5</span><span class="label">Euro98</span></div>
-        <div class="val" id="p98"></div>
-        <div class="src" id="p98Src"></div>
-      </div>
-    </div>
-
-    <div class="km-row">
-      <label for="kmToday">Kilometers vandaag</label>
-      <span class="km-out" id="kmTodayOut"></span>
       <input type="range" id="kmToday" min="5" max="200" step="5">
-    </div>
+    </section>
 
-    <div class="options" id="options"></div>
-    <p class="small muted" id="perKm"></p>
+    <section class="g card">
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <div class="pills">
+      <div class="g pill"><span class="k" style="color:var(--laden)">LAADPAAL</span><span class="v num" id="pKwh"></span><span class="s" id="pKwhSrc"></span></div>
+      <div class="g pill"><span class="k" style="color:var(--e95)">EURO95</span><span class="v num" id="p95"></span><span class="s" id="p95Src"></span></div>
+      <div class="g pill"><span class="k" style="color:var(--e98)">EURO98</span><span class="v num" id="p98"></span><span class="s" id="p98Src"></span></div>
+    </div>
+    <p class="note" id="perKm"></p>
   </section>
 
-  <!-- LOGBOEK -->
-  <section class="panel" aria-labelledby="h-log">
-    <div class="section-head">
-      <h2 id="h-log">Logboek &amp; besparing</h2>
-      <span class="small muted">Vul na elke laadbeurt de dag in</span>
-    </div>
-
-    <div class="notice" id="exampleNotice" hidden><b>Voorbeelddata.</b> Hieronder staan 14 verzonnen dagen zodat je ziet hoe het werkt. Zodra je je eerste eigen dag toevoegt, verdwijnen ze.</div>
-
-    <div class="import-row">
-      <button type="button" id="btnImport">ANWB-factuur inlezen (PDF)</button>
-      <input type="file" id="fileImport" accept="application/pdf,.pdf" hidden>
-      <p class="status" id="importStatus">Kies de maandelijkse factuurspecificatie van ANWB. De app zet alle laadsessies per dag in het logboek. Het bestand blijft op dit apparaat.</p>
-    </div>
-
-    <form class="entry" id="entryForm">
-      <div class="field"><label for="fDate">Datum</label><input type="date" id="fDate" required></div>
-      <div class="field"><label for="fKm">Gereden km</label><input type="number" id="fKm" min="0" step="1" required placeholder="42"></div>
-      <div class="field"><label for="fKwh">Geladen kWh</label><input type="number" id="fKwh" min="0" step="0.01" placeholder="10.5"></div>
-      <div class="field"><label for="fTarief">€ per kWh</label><input type="number" id="fTarief" min="0" step="0.001" required></div>
-      <div class="field"><label for="fStart">Starttarief €</label><input type="number" id="fStart" min="0" step="0.01"></div>
-      <div class="field"><label for="f95">Euro95 €/l</label><input type="number" id="f95" min="0" step="0.001" required></div>
-      <div class="field"><label for="f98">Euro98 €/l</label><input type="number" id="f98" min="0" step="0.001" required></div>
-      <div class="field"><label for="fWho">Wie</label><select id="fWho"><option>Ik</option><option>Partner</option><option>Samen</option></select></div>
-      <div class="field"><button type="submit">Dag opslaan</button></div>
-    </form>
-    <p class="small muted">Dag uit de ANWB-factuur? Vul alleen de datum en de gereden km in, dan worden de km aan die dag toegevoegd. Zonder km rekent de app de elektrische km uit de geladen kWh.</p>
-
-    <div class="tiles" id="tiles"></div>
-
-    <div class="charts">
-      <div class="chart" id="chartDaily">
-        <h3>Kosten per dag</h3>
-        <div class="legend">
-          <span><i class="swatch" style="background:var(--s-laden)"></i>Met laden (+ rest benzine)</span>
-          <span><i class="swatch" style="background:var(--s-e95)"></i>Alleen Euro95</span>
-          <span><i class="swatch" style="background:var(--s-e98)"></i>Alleen Euro98</span>
-        </div>
-        <div class="svg-host"></div>
+  <!-- MAAND -->
+  <section class="view" id="view-maand" aria-labelledby="h-maand" hidden>
+    <div class="head">
+      <div>
+        <div class="eyebrow" id="monthYear"></div>
+        <h1 id="h-maand">Maand</h1>
       </div>
-      <div class="chart" id="chartCum">
-        <h3>Opgebouwde besparing door laden</h3>
-        <div class="legend">
-          <span><i class="swatch" style="background:var(--s-e95)"></i>t.o.v. Euro95</span>
-          <span><i class="swatch" style="background:var(--s-e98)"></i>t.o.v. Euro98</span>
-        </div>
-        <div class="svg-host"></div>
+      <div class="head-actions">
+        <button class="g round" type="button" id="prevMonth" aria-label="Vorige maand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="g round" type="button" id="nextMonth" aria-label="Volgende maand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
       </div>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Datum</th><th>Wie</th><th>Km</th><th>kWh</th><th>Elektr. km</th><th>Kosten laden</th><th>Met laden*</th><th>Alleen E95</th><th>Alleen E98</th><th>Bespaard vs E95</th><th>Bespaard vs E98</th><th></th></tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
+    <p class="g example" data-example hidden><b>Voorbeelddata.</b> Lees je eerste ANWB-factuur in of voeg een dag toe, dan verdwijnen deze verzonnen dagen.</p>
+
+    <section class="g card hero">
+      <span class="sub" style="font-weight:600">Bespaard door te laden</span>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <span class="big num" id="mSave"></span>
+        <span class="sub" id="mSaveVs"></span>
+      </div>
+      <span class="sub num" id="mSaveOther" style="font-weight:600"></span>
+      <div class="stats">
+        <div class="stat"><b class="num" id="mKwh"></b><span>kWh geladen</span></div>
+        <div class="stat"><b class="num" id="mCost"></b><span>laadkosten</span></div>
+        <div class="stat"><b class="num" id="mKm"></b><span id="mKmLabel">elektrisch</span></div>
+      </div>
+    </section>
+
+    <section class="g card">
+      <div class="chart-head"><h2>Besparing per laaddag</h2><span id="chartVs"></span></div>
+      <div class="chart" id="chart"></div>
+      <p class="detail" id="chartDetail" aria-live="polite"></p>
+    </section>
+
+    <section class="g card status-card" id="importCard">
+      <span class="ic info" id="importIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></span>
+      <div class="t"><b id="importTitle">Nog geen factuur ingelezen</b><span id="importStatus">Kies de maandelijkse factuurspecificatie (PDF) uit de mail van ANWB. Het bestand blijft op dit apparaat.</span></div>
+    </section>
+
+    <button class="cta" type="button" data-import>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+      ANWB-factuur inlezen
+    </button>
+  </section>
+
+  <!-- SESSIES -->
+  <section class="view" id="view-sessies" aria-labelledby="h-sessies" hidden>
+    <div class="head">
+      <div>
+        <div class="eyebrow">Logboek</div>
+        <h1 id="h-sessies">Sessies</h1>
+      </div>
+      <button class="g round" type="button" id="btnAdd" aria-label="Dag toevoegen" aria-expanded="false" aria-controls="addCard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
-    <p class="small muted">* Met laden = laadkosten + benzine (Euro95) voor de kilometers die je verder reed dan de accu toeliet. In de kolom "Bespaard vs E98" is die rest met Euro98 gerekend.</p>
+
+    <section class="g card" id="addCard" hidden>
+      <h2>Dag toevoegen</h2>
+      <form class="form" id="entryForm">
+        <div class="field"><label for="fDate">Datum</label><input type="date" id="fDate" required></div>
+        <div class="field"><label for="fKm">Gereden km</label><input type="number" inputmode="decimal" id="fKm" min="0" step="1" required placeholder="42"></div>
+        <div class="field"><label for="fKwh">Geladen kWh</label><input type="number" inputmode="decimal" id="fKwh" min="0" step="0.01" placeholder="10,5"></div>
+        <div class="field"><label for="fTarief">€ per kWh</label><input type="number" inputmode="decimal" id="fTarief" min="0" step="0.001" required></div>
+        <div class="field"><label for="fStart">Starttarief €</label><input type="number" inputmode="decimal" id="fStart" min="0" step="0.01"></div>
+        <div class="field"><label for="fWho">Wie</label><select id="fWho"><option>Ik</option><option>Partner</option><option>Samen</option></select></div>
+        <div class="field"><label for="f95">Euro95 €/l</label><input type="number" inputmode="decimal" id="f95" min="0" step="0.001" required></div>
+        <div class="field"><label for="f98">Euro98 €/l</label><input type="number" inputmode="decimal" id="f98" min="0" step="0.001" required></div>
+        <p class="hint small full">Dag uit de ANWB-factuur? Vul alleen datum en km in en laat kWh leeg, dan worden de km aan die dag toegevoegd.</p>
+        <div class="btns full"><button type="submit" class="btn primary">Opslaan</button><button type="button" class="btn" id="btnAddCancel">Annuleren</button></div>
+      </form>
+    </section>
+
+    <p class="g example" data-example hidden><b>Voorbeelddata.</b> Deze dagen zijn verzonnen. Ze verdwijnen zodra je een factuur inleest of een dag toevoegt.</p>
+    <div id="sessionList" class="view" style="gap:10px"></div>
   </section>
 
   <!-- INSTELLINGEN -->
-  <section class="panel" aria-labelledby="h-set">
-    <details id="settingsBox">
-      <summary><h2 id="h-set" style="display:inline">Instellingen &amp; prijzen</h2></summary>
-      <div style="display:grid; gap:18px">
-        <div class="btn-row">
-          <button type="button" id="btnFetch">Benzineprijs ophalen (CBS)</button>
-          <span class="small muted" id="fetchStatus"></span>
-        </div>
-        <div class="settings">
-          <div class="field"><label for="sP95">Euro95 vandaag €/l</label><input type="number" id="sP95" step="0.001" min="0"><span class="hint">Landelijk gemiddelde</span></div>
-          <div class="field"><label for="sP98">Euro98 vandaag €/l</label><input type="number" id="sP98" step="0.001" min="0"><span class="hint">Leeg = Euro95 + toeslag</span></div>
-          <div class="field"><label for="s98Premium">Toeslag Euro98 €/l</label><input type="number" id="s98Premium" step="0.01" min="0"><span class="hint">Gebruikt als er geen 98-prijs is</span></div>
-          <div class="field"><label for="sKwh">Laadtarief €/kWh</label><input type="number" id="sKwh" step="0.001" min="0"><span class="hint">Zie je laadpas-app</span></div>
-          <div class="field"><label for="sStart">Starttarief per sessie €</label><input type="number" id="sStart" step="0.01" min="0"></div>
-          <div class="field"><label for="sElec">Stroomverbruik kWh/100 km</label><input type="number" id="sElec" step="0.1" min="1"><span class="hint">Gemeten vanaf de paal, incl. laadverlies</span></div>
-          <div class="field"><label for="sFuel">Benzineverbruik l/100 km</label><input type="number" id="sFuel" step="0.1" min="1"><span class="hint">Met lege accu, praktijk</span></div>
-          <div class="field"><label for="sBatt">kWh per volle laadbeurt</label><input type="number" id="sBatt" step="0.1" min="1"><span class="hint">Wat de paal meet bij 0→100%</span></div>
-          <div class="field"><label for="sKmDay">Standaard km per dag</label><input type="number" id="sKmDay" step="1" min="1"></div>
-        </div>
-        <div class="btn-row">
-          <button type="button" class="ghost" id="btnReset">Standaardwaarden terugzetten</button>
-          <button type="button" class="ghost" id="btnClear">Logboek wissen</button>
-          <span class="small" id="clearConfirm" hidden>Zeker weten? <button type="button" class="link" id="btnClearYes">Ja, alles wissen</button> <button type="button" class="link" id="btnClearNo">Annuleren</button></span>
-        </div>
-      </div>
-    </details>
-  </section>
-
-  <footer>
-    <p>Benzineprijs: landelijk gemiddelde pompprijs Euro95 van het CBS (dataset 80416ned, bijgewerkt met een paar dagen vertraging). Het CBS publiceert geen Euro98; die prijs is Euro95 plus de toeslag uit de instellingen, tenzij je hem zelf invult.</p>
-    <p>Rekenmethode: elektrische km = geladen kWh ÷ stroomverbruik (max. de gereden km). Besparing = benzine die je voor die elektrische km had getankt − laadkosten. Gegevens blijven in deze browser op dit apparaat.</p>
-    <div class="theme-row">
-      <span class="label" id="themeLabel">Weergave</span>
-      <div class="theme-toggle" role="group" aria-labelledby="themeLabel">
-        <button type="button" id="themeLight" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Licht</button>
-        <button type="button" id="themeDark" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Donker</button>
+  <section class="view" id="view-instellingen" aria-labelledby="h-inst" hidden>
+    <div class="head">
+      <div>
+        <div class="eyebrow">Cupra Formentor VZ e-Hybrid</div>
+        <h1 id="h-inst">Instellingen</h1>
       </div>
     </div>
-  </footer>
-</div>
+
+    <section class="g card">
+      <h2>Benzineprijzen</h2>
+      <div class="btns"><button type="button" class="btn primary" id="btnFetch">Ophalen bij CBS</button><span class="small" id="fetchStatus"></span></div>
+      <div class="form">
+        <div class="field"><label for="sP95">Euro95 €/l</label><input type="number" inputmode="decimal" id="sP95" step="0.001" min="0"><span class="hint">Landelijk gemiddelde</span></div>
+        <div class="field"><label for="sP98">Euro98 €/l</label><input type="number" inputmode="decimal" id="sP98" step="0.001" min="0"><span class="hint">Leeg = Euro95 + toeslag</span></div>
+        <div class="field"><label for="s98Premium">Toeslag Euro98 €/l</label><input type="number" inputmode="decimal" id="s98Premium" step="0.01" min="0"></div>
+      </div>
+    </section>
+
+    <section class="g card">
+      <h2>Laden</h2>
+      <div class="form">
+        <div class="field"><label for="sKwh">Laadtarief €/kWh</label><input type="number" inputmode="decimal" id="sKwh" step="0.001" min="0"><span class="hint">Wordt bijgewerkt bij het inlezen van een factuur</span></div>
+        <div class="field"><label for="sStart">Starttarief per sessie €</label><input type="number" inputmode="decimal" id="sStart" step="0.01" min="0"></div>
+      </div>
+    </section>
+
+    <section class="g card">
+      <h2>Auto en ritten</h2>
+      <div class="form">
+        <div class="field"><label for="sElec">Stroom kWh/100 km</label><input type="number" inputmode="decimal" id="sElec" step="0.1" min="1"><span class="hint">Vanaf de paal, incl. laadverlies</span></div>
+        <div class="field"><label for="sFuel">Benzine l/100 km</label><input type="number" inputmode="decimal" id="sFuel" step="0.1" min="1"><span class="hint">Met lege accu</span></div>
+        <div class="field"><label for="sBatt">kWh per volle lading</label><input type="number" inputmode="decimal" id="sBatt" step="0.1" min="1"><span class="hint">Wat de paal meet bij 0→100%</span></div>
+        <div class="field"><label for="sKmDay">Standaard km per dag</label><input type="number" inputmode="decimal" id="sKmDay" step="1" min="1"></div>
+      </div>
+    </section>
+
+    <section class="g card">
+      <h2>Gegevens</h2>
+      <div class="btns">
+        <button type="button" class="btn" id="btnReset">Standaardwaarden terugzetten</button>
+        <button type="button" class="btn danger" id="btnClear">Logboek wissen</button>
+      </div>
+      <div class="btns" id="clearConfirm" hidden>
+        <span class="small">Alle dagen en ingelezen facturen wissen?</span>
+        <button type="button" class="btn danger" id="btnClearYes">Ja, wissen</button>
+        <button type="button" class="btn" id="btnClearNo">Annuleren</button>
+      </div>
+    </section>
+
+    <div class="foot">
+      <p>Euro95: landelijk gemiddelde pompprijs van het CBS (dataset 80416ned, een paar dagen vertraging). Het CBS publiceert geen Euro98; die prijs is Euro95 plus de toeslag, tenzij je hem zelf invult.</p>
+      <p>Rekenmethode: elektrische km = geladen kWh ÷ stroomverbruik. Besparing = benzine voor die km − laadkosten. Alle gegevens blijven in deze browser op dit apparaat.</p>
+    </div>
+
+    <section class="g card" aria-labelledby="h-theme">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h2 id="h-theme">Weergave</h2>
+        <div class="seg" role="group" aria-labelledby="h-theme" style="background:var(--inset);min-width:220px">
+          <button type="button" id="themeLight">Licht</button>
+          <button type="button" id="themeDark">Donker</button>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<nav class="g tabs" aria-label="Hoofdmenu">
+  <a href="#vandaag" data-tab="vandaag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Vandaag</a>
+  <a href="#maand" data-tab="maand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Maand</a>
+  <a href="#sessies" data-tab="sessies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Sessies</a>
+  <a href="#instellingen" data-tab="instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Instellingen</a>
+</nav>
+<div class="g toast" id="toast" role="status" hidden></div>
 
 <script>
 (function () {
@@ -360,7 +462,7 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
   const DEFAULTS = {
     p95: 2.049, p98: null, premium98: 0.14, p95Date: null, p95Source: "voorbeeldprijs",
     kwh: 0.39, start: 0,
-    elec: 20.0, fuel: 6.6, batt: 11.0, kmDay: 40
+    elec: 20.0, fuel: 6.6, batt: 11.0, kmDay: 40, cmp: "95"
   };
   const KEY_S = "lot.settings.v1", KEY_L = "lot.log.v1";
 
@@ -372,21 +474,28 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
   let S = Object.assign({}, DEFAULTS, store.get(KEY_S) || {});
   let log = store.get(KEY_L) || [];
   let kmToday = S.kmDay;
+  let viewMonth = null;
 
   const $ = (id) => document.getElementById(id);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
   const eur = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
   const eur3 = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const n1 = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
   const n0 = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 0 });
-  const dFmt = new Intl.DateTimeFormat("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dHead = new Intl.DateTimeFormat("nl-NL", { weekday: "long", day: "numeric", month: "long" });
   const dShort = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short" });
+  const dDow = new Intl.DateTimeFormat("nl-NL", { weekday: "short" });
+  const mName = new Intl.DateTimeFormat("nl-NL", { month: "long" });
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const signed = (v) => (v >= 0 ? "+" : "−") + eur.format(Math.abs(v));
   const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   const parseIso = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   const p98Now = () => (S.p98 != null && S.p98 > 0 ? S.p98 : S.p95 + S.premium98);
   const saveS = () => store.set(KEY_S, S);
   const saveL = () => store.set(KEY_L, log);
+  const is98 = () => S.cmp === "98";
 
   // ---------- Rekenkern ----------
   // Eén dag: hoeveel km elektrisch, wat kost laden, wat kost het alternatief.
@@ -430,193 +539,208 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
   const entries = () => (log.length ? log : exampleLog()).slice().sort((a, b) => a.date.localeCompare(b.date));
 
   // ---------- Iconen ----------
-  const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-  const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>';
+  const ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  const ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>';
+  const ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
   // ---------- Vandaag ----------
   function renderToday() {
-    $("todayDate").textContent = dFmt.format(new Date());
-    $("carSummary").textContent = n1.format(S.elec) + " kWh/100 km · " + n1.format(S.fuel) + " l/100 km · ±" + n0.format(S.batt * 100 / S.elec) + " km elektrisch";
+    $("todayDate").textContent = dHead.format(new Date());
+    const fuelName = is98() ? "Euro98" : "Euro95";
+    const price = is98() ? p98Now() : S.p95;
+    const be = (S.fuel * price) / S.elec;
+    const p = planToday(kmToday);
+    const save = is98() ? p.save98 : p.save95;
+    const other = is98() ? p.save95 : p.save98;
+    const wins = save >= 0;
 
-    $("pKwh").innerHTML = eur3.format(S.kwh) + "<small>/kWh</small>";
-    $("pKwhSrc").textContent = S.start > 0 ? "+ " + eur.format(S.start) + " starttarief per sessie" : "Jouw tarief openbare laadpaal";
-    $("p95").innerHTML = eur3.format(S.p95) + "<small>/l</small>";
-    $("p95Src").textContent = S.p95Date ? "CBS landelijk gem. · " + dShort.format(parseIso(S.p95Date)) : (S.p95Source === "handmatig" ? "Handmatig ingevuld" : "Voorbeeldprijs, haal de actuele op");
-    $("p98").innerHTML = eur3.format(p98Now()) + "<small>/l</small>";
-    $("p98Src").textContent = S.p98 ? "Handmatig ingevuld" : "Euro95 + " + eur.format(S.premium98) + " toeslag";
+    const chip = $("verdictChip");
+    chip.className = "chip " + (wins ? "good" : "bad");
+    chip.innerHTML = (wins ? ICON_OK + "Laden wint" : ICON_WARN + "Tanken wint");
+    const big = $("verdictBig");
+    big.className = "big num " + (wins ? "" : "bad");
+    big.textContent = eur.format(Math.abs(save));
+    $("verdictSub").innerHTML = (wins ? "goedkoper" : "duurder") + " dan " + fuelName + " bij " + kmToday + " km<br>" +
+      eur.format(Math.abs(other)) + " " + (other >= 0 ? "goedkoper" : "duurder") + " dan " + (is98() ? "Euro95" : "Euro98");
 
-    // Break-even: tot welke kWh-prijs is laden goedkoper?
-    const be95 = (S.fuel * S.p95) / S.elec;
-    const be98 = (S.fuel * p98Now()) / S.elec;
-    const cheaper = S.kwh < be95;
-    const pill = $("verdictPill");
-    pill.className = "pill " + (cheaper ? "good" : "bad");
-    pill.innerHTML = (cheaper ? ICON_UP + "Laden is voordeliger" : ICON_X + "Tanken is voordeliger");
-    $("verdictLine").innerHTML = cheaper
-      ? "Laden blijft goedkoper zolang de kWh-prijs onder <strong class='num'>" + eur3.format(be95) + "</strong> ligt (Euro95) of <strong class='num'>" + eur3.format(be98) + "</strong> (Euro98)."
-      : "Bij " + eur3.format(S.kwh) + "/kWh is benzine goedkoper. Laden wordt pas voordelig onder <strong class='num'>" + eur3.format(be95) + "</strong>/kWh.";
+    const share = Math.min(1, S.kwh / be);
+    const ring = $("ring");
+    ring.style.background = "conic-gradient(" + (S.kwh < be ? "var(--laden)" : "var(--bad)") + " 0 " + (share * 100).toFixed(1) + "%, var(--inset) " + (share * 100).toFixed(1) + "% 100%)";
+    ring.setAttribute("aria-label", "Jouw laadtarief " + eur3.format(S.kwh) + " per kWh; laden loont tot " + eur3.format(be));
+    $("ringVal").textContent = eur3.format(S.kwh).replace(/\s/g, "");
+    $("ringSub").innerHTML = "per kWh<br>max " + eur3.format(be).replace(/\s/g, "");
 
-    $("kmToday").value = kmToday;
+    $$("[data-cmp]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.cmp === S.cmp)));
+
+    const slider = $("kmToday");
+    slider.value = kmToday;
+    slider.style.setProperty("--fill", ((kmToday - slider.min) / (slider.max - slider.min) * 100).toFixed(1) + "%");
     $("kmTodayOut").textContent = kmToday + " km";
 
-    const p = planToday(kmToday);
+    const mix = is98() ? p.mix98 : p.mix95;
+    const fuelCol = is98() ? "var(--e98)" : "var(--e95)";
     const rows = [
-      { name: "Laden + rest Euro95", color: "var(--s-laden)", total: p.mix95, parts: [[p.chargeCost, "var(--s-laden)"], [p.mix95 - p.chargeCost, "var(--s-e95)"]], sub: n0.format(p.elecKm) + " km elektrisch" + (p.restKm > 0 ? ", " + n0.format(p.restKm) + " km op Euro95" : "") },
-      { name: "Laden + rest Euro98", color: "var(--s-laden)", total: p.mix98, parts: [[p.chargeCost, "var(--s-laden)"], [p.mix98 - p.chargeCost, "var(--s-e98)"]], sub: p.restKm > 0 ? n0.format(p.restKm) + " km op Euro98" : "" },
-      { name: "Alleen Euro95", color: "var(--s-e95)", total: p.only95, parts: [[p.only95, "var(--s-e95)"]] },
-      { name: "Alleen Euro98", color: "var(--s-e98)", total: p.only98, parts: [[p.only98, "var(--s-e98)"]] }
+      { name: "Laden + rest " + fuelName, total: mix, parts: [[p.chargeCost, "var(--laden)"], [mix - p.chargeCost, fuelCol]],
+        meta: n0.format(p.elecKm) + " km elektrisch" + (p.restKm > 0.5 ? " · " + n0.format(p.restKm) + " km op " + fuelName : "") },
+      { name: "Alleen Euro95", total: p.only95, parts: [[p.only95, "var(--e95)"]], meta: eur.format(p.only95 / kmToday * 100) + " per 100 km" },
+      { name: "Alleen Euro98", total: p.only98, parts: [[p.only98, "var(--e98)"]], meta: eur.format(p.only98 / kmToday * 100) + " per 100 km" }
     ];
     const max = Math.max(...rows.map(r => r.total)) || 1;
-    $("options").innerHTML = rows.map(r => {
-      const bars = r.parts.filter(pt => pt[0] > 0.0005).map(pt => '<i style="width:' + (pt[0] / max * 100).toFixed(2) + '%;background:' + pt[1] + '"></i>').join("");
-      return '<div class="opt"><div class="name"><i class="swatch" style="background:' + r.color + '"></i><span>' + r.name + '</span></div>' +
-        '<div class="bar" role="img" aria-label="' + r.name + ': ' + eur.format(r.total) + '">' + bars + '</div>' +
-        '<div class="cost"><b>' + eur.format(r.total) + '</b><div>' + eur.format(r.total / kmToday * 100) + ' /100 km</div></div>' +
-        (r.sub ? '<div class="sub">' + r.sub + '</div>' : "") + '</div>';
-    }).join("");
+    $("rows").innerHTML = rows.map(r =>
+      '<div class="row"><div class="top"><span>' + r.name + '</span><b class="num">' + eur.format(r.total) + '</b></div>' +
+      '<div class="bar" role="img" aria-label="' + r.name + ': ' + eur.format(r.total) + '">' +
+      r.parts.filter(pt => pt[0] > 0.005).map(pt => '<i style="width:' + (pt[0] / max * 100).toFixed(2) + '%;background:' + pt[1] + '"></i>').join("") +
+      '</div><span class="meta">' + r.meta + '</span></div>').join("");
 
-    const perKmE = S.elec / 100 * S.kwh, perKm95 = S.fuel / 100 * S.p95, perKm98 = S.fuel / 100 * p98Now();
-    $("perKm").innerHTML = "Per kilometer: elektrisch <span class='num'>" + eur3.format(perKmE) + "</span>, Euro95 <span class='num'>" + eur3.format(perKm95) + "</span>, Euro98 <span class='num'>" + eur3.format(perKm98) + "</span>. " +
-      "Vandaag " + (p.save95 >= 0 ? "bespaar" : "verlies") + " je <b class='num'>" + eur.format(Math.abs(p.save95)) + "</b> t.o.v. Euro95 en <b class='num'>" + eur.format(Math.abs(p.save98)) + "</b> " + (p.save98 >= 0 ? "bespaard" : "extra") + " t.o.v. Euro98" +
-      " · ±" + eur.format(p.save95 * 30) + " per maand bij dagelijks laden.";
+    $("pKwh").textContent = eur3.format(S.kwh);
+    $("pKwhSrc").textContent = S.start > 0 ? "+ " + eur.format(S.start) + " start" : "per kWh";
+    $("p95").textContent = eur3.format(S.p95);
+    $("p95Src").textContent = S.p95Date ? "CBS · " + dShort.format(parseIso(S.p95Date)) : (S.p95Source === "handmatig" ? "handmatig" : "voorbeeldprijs");
+    $("p98").textContent = eur3.format(p98Now());
+    $("p98Src").textContent = S.p98 ? "handmatig" : "E95 + " + eur.format(S.premium98).replace(/\s/g, "");
+
+    const perE = S.elec / 100 * S.kwh * 100, per95 = S.fuel / 100 * S.p95 * 100, per98 = S.fuel / 100 * p98Now() * 100;
+    $("perKm").innerHTML = "Per km: elektrisch <b class='num'>" + n1.format(perE) + " ct</b>, Euro95 <b class='num'>" + n1.format(per95) + " ct</b>, Euro98 <b class='num'>" + n1.format(per98) + " ct</b>. " +
+      "Laad je elke dag zo, dan is dat ongeveer <b class='num'>" + signed(save * 30) + "</b> per maand.";
   }
 
-  // ---------- Logboek ----------
-  function renderLog() {
-    const list = entries();
-    const isEx = !log.length;
-    $("exampleNotice").hidden = !isEx;
-    const calc = list.map(e => Object.assign({ e }, dayCalc(e)));
+  // ---------- Maand ----------
+  const monthKey = (date) => date.slice(0, 7);
+  function months() { return Array.from(new Set(entries().map(e => monthKey(e.date)))).sort(); }
 
-    const kmGuessed = calc.some(c => c.e.km == null);
-    const tot = calc.reduce((a, c) => {
-      a.km += c.km; a.kwh += c.e.kwh; a.ek += c.elecKm; a.charge += c.chargeCost; a.s95 += c.save95; a.s98 += c.save98; return a;
-    }, { km: 0, kwh: 0, ek: 0, charge: 0, s95: 0, s98: 0 });
-    const days = calc.length || 1;
-    const cls = (v) => (v >= 0 ? "good" : "bad");
-    $("tiles").innerHTML = [
-      ["Bespaard t.o.v. Euro95", signed(tot.s95), cls(tot.s95), eur.format(tot.s95 / days) + " gemiddeld per dag"],
-      ["Bespaard t.o.v. Euro98", signed(tot.s98), cls(tot.s98), eur.format(tot.s98 / days) + " gemiddeld per dag"],
-      ["Elektrisch gereden", n0.format(tot.ek) + " km", "", n0.format(tot.km ? tot.ek / tot.km * 100 : 0) + "% van " + n0.format(tot.km) + " km" + (kmGuessed ? " (deels berekend uit kWh)" : "")],
-      ["Uitgegeven aan laden", eur.format(tot.charge), "", n1.format(tot.kwh) + " kWh over " + calc.length + " dagen"]
-    ].map(t => '<div class="tile"><span class="label">' + t[0] + '</span><span class="v ' + t[2] + '">' + t[1] + '</span><span class="d">' + t[3] + '</span></div>').join("");
+  function renderMonth() {
+    const ms = months();
+    if (!viewMonth || !ms.includes(viewMonth)) viewMonth = ms[ms.length - 1] || iso(new Date()).slice(0, 7);
+    const idx = ms.indexOf(viewMonth);
+    $("prevMonth").disabled = idx <= 0;
+    $("nextMonth").disabled = idx < 0 || idx >= ms.length - 1;
+    const [y, m] = viewMonth.split("-").map(Number);
+    $("monthYear").textContent = String(y);
+    $("h-maand").textContent = cap(mName.format(new Date(y, m - 1, 1)));
 
-    $("tbody").innerHTML = calc.slice().reverse().map(c => {
-      const e = c.e;
-      return '<tr class="' + (e.example ? "example" : "") + '"><td>' + dShort.format(parseIso(e.date)) + '</td><td>' + (e.who || (e.source === "anwb" ? "ANWB" : "")) + '</td><td>' + (e.km == null ? "–" : n0.format(e.km)) + '</td><td>' + n1.format(e.kwh) + '</td><td>' + n0.format(c.elecKm) + '</td><td>' + eur.format(c.chargeCost) +
-        '</td><td>' + eur.format(c.mix95) + '</td><td>' + eur.format(c.only95) + '</td><td>' + eur.format(c.only98) + '</td><td class="' + cls(c.save95) + '">' + signed(c.save95) + '</td><td class="' + cls(c.save98) + '">' + signed(c.save98) + '</td><td>' +
-        (e.example ? "" : '<button type="button" class="link" data-del="' + e.id + '" aria-label="Verwijder ' + e.date + '">Verwijder</button>') + '</td></tr>';
-    }).join("");
+    const calc = entries().filter(e => monthKey(e.date) === viewMonth).map(e => Object.assign({ e }, dayCalc(e)));
+    const t = calc.reduce((a, c) => { a.kwh += c.e.kwh; a.cost += c.chargeCost; a.ek += c.elecKm; a.s95 += c.save95; a.s98 += c.save98; return a; }, { kwh: 0, cost: 0, ek: 0, s95: 0, s98: 0 });
+    const save = is98() ? t.s98 : t.s95, other = is98() ? t.s95 : t.s98;
+    const big = $("mSave");
+    big.className = "big num " + (save >= 0 ? "good" : "bad");
+    big.textContent = signed(save);
+    $("mSaveVs").textContent = "vs " + (is98() ? "Euro98" : "Euro95");
+    $("mSaveOther").textContent = signed(other) + " vs " + (is98() ? "Euro95" : "Euro98");
+    $("mKwh").textContent = n1.format(t.kwh);
+    $("mCost").textContent = eur.format(t.cost);
+    $("mKm").textContent = n0.format(t.ek) + " km";
+    $("chartVs").textContent = "vs " + (is98() ? "Euro98" : "Euro95");
 
-    drawDaily(calc.slice(-31));
-    drawCum(calc);
+    drawChart(calc);
   }
 
-  // ---------- Grafieken (SVG) ----------
+  // Staafgrafiek: besparing per laaddag, onder de nullijn als laden duurder was.
   const NS = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
-  // Kies 4 of 5 rasterlijnen zodat de stap een rond bedrag is (1, 2, 5 × 10^n).
-  function tickCount(span) { for (const k of [5, 4]) { const st = span / k, p = Math.pow(10, Math.floor(Math.log10(st))), f = +(st / p).toFixed(6); if ([1, 2, 5].includes(f)) return k; } return 4; }
-  function niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
-  function tipFor(box) {
-    let t = box.querySelector(".tip");
-    if (!t) { t = document.createElement("div"); t.className = "tip"; t.hidden = true; box.appendChild(t); }
-    return t;
-  }
-  function showTip(box, x, y, html) { const t = tipFor(box); t.innerHTML = html; t.style.left = x + "px"; t.style.top = y + "px"; t.hidden = false; }
-  function hideTip(box) { const t = box.querySelector(".tip"); if (t) t.hidden = true; }
-  const tipRow = (c, label, v) => '<div class="row"><i class="swatch" style="background:' + c + '"></i>' + label + ': ' + v + '</div>';
+  function niceStep(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
 
-  function drawDaily(calc) {
-    const box = $("chartDaily"), host = box.querySelector(".svg-host");
+  function drawChart(calc) {
+    const host = $("chart");
     host.innerHTML = "";
-    const W = Math.max(300, host.clientWidth || 480), H = 240, m = { l: 44, r: 8, t: 10, b: 26 };
-    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Kosten per dag: met laden, alleen Euro95, alleen Euro98" }, host);
-    const max = niceMax(Math.max(...calc.map(c => Math.max(c.mix95, c.only95, c.only98)), 1));
-    const y = (v) => m.t + (H - m.t - m.b) * (1 - v / max);
-    const g = el("g", { class: "grid" }, svg);
-    const tk = tickCount(max);
-    for (let i = 0; i <= tk; i++) {
-      const v = max * i / tk;
-      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }, g);
+    const detail = $("chartDetail");
+    if (!calc.length) { detail.textContent = "Geen laaddagen in deze maand."; return; }
+    const vals = calc.map(c => is98() ? c.save98 : c.save95);
+    const W = Math.max(280, host.clientWidth || 320), H = 150, m = { l: 34, r: 4, t: 8, b: 22 };
+    const step = niceStep(Math.max(0.5, Math.max(...vals.map(Math.abs))) / 2);
+    const hi = Math.max(step, Math.ceil(Math.max(0, ...vals) / step) * step);
+    const lo = Math.min(0, Math.floor(Math.min(0, ...vals) / step) * step);
+    const y = (v) => m.t + (H - m.t - m.b) * (hi - v) / (hi - lo);
+    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Besparing per laaddag: van " + signed(Math.min(...vals)) + " tot " + signed(Math.max(...vals)) }, host);
+    for (let v = lo; v <= hi + 1e-9; v += step) {
+      el("line", { class: v === 0 ? "zero" : "gridline", x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }, svg);
       el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg).textContent = "€" + n1.format(v);
     }
-    const n = calc.length || 1, slot = (W - m.l - m.r) / n;
-    const bw = Math.max(3, Math.min(14, (slot - 8) / 3 - 2));
-    const series = [["mix95", "var(--s-laden)", "Met laden"], ["only95", "var(--s-e95)", "Alleen E95"], ["only98", "var(--s-e98)", "Alleen E98"]];
+    // Eén slot per kalenderdag, zodat gaten tussen laaddagen zichtbaar blijven.
+    const [yy, mm] = viewMonth.split("-").map(Number);
+    const daysIn = new Date(yy, mm, 0).getDate();
+    const slot = (W - m.l - m.r) / daysIn;
+    const bw = Math.max(3, Math.min(16, slot - 3));
+    const best = vals.indexOf(Math.max(...vals));
+    const bars = [];
     calc.forEach((c, i) => {
-      const cx = m.l + slot * i + slot / 2;
-      const x0 = cx - (bw * 3 + 4) / 2;
-      series.forEach((s, j) => {
-        const v = c[s[0]], top = y(v), h = Math.max(0, y(0) - top), x = x0 + j * (bw + 2), r = Math.min(4, bw / 2, h);
-        el("path", { d: "M" + x + "," + y(0) + "V" + (top + r) + "Q" + x + "," + top + " " + (x + r) + "," + top + "H" + (x + bw - r) + "Q" + (x + bw) + "," + top + " " + (x + bw) + "," + (top + r) + "V" + y(0) + "Z", fill: s[1] }, svg);
-      });
-      const every = Math.ceil(n / Math.max(2, Math.floor((W - m.l - m.r) / 52)));
-      if (i % every === 0)
-        el("text", { x: cx, y: H - 8, "text-anchor": "middle" }, svg).textContent = dShort.format(parseIso(c.e.date));
-      const hit = el("rect", { x: m.l + slot * i, y: m.t, width: slot, height: H - m.t - m.b, fill: "transparent" }, svg);
-      hit.addEventListener("mouseenter", () => {
-        const sc = host.clientWidth / W;
-        showTip(box, (cx) * sc, host.offsetTop + y(c.only98) * sc,
-          "<b>" + dShort.format(parseIso(c.e.date)) + " · " + n0.format(c.km) + " km</b>" + tipRow("var(--s-laden)", "Met laden", eur.format(c.mix95)) + tipRow("var(--s-e95)", "Alleen E95", eur.format(c.only95)) + tipRow("var(--s-e98)", "Alleen E98", eur.format(c.only98)));
-      });
-      hit.addEventListener("mouseleave", () => hideTip(box));
+      const d = +c.e.date.slice(8, 10), v = vals[i];
+      const x = m.l + slot * (d - 1) + (slot - bw) / 2;
+      const top = Math.min(y(v), y(0)), h = Math.max(1.5, Math.abs(y(v) - y(0)));
+      const r = Math.min(4, bw / 2, h);
+      const path = v >= 0
+        ? "M" + x + "," + (top + h) + "V" + (top + r) + "Q" + x + "," + top + " " + (x + r) + "," + top + "H" + (x + bw - r) + "Q" + (x + bw) + "," + top + " " + (x + bw) + "," + (top + r) + "V" + (top + h) + "Z"
+        : "M" + x + "," + top + "V" + (top + h - r) + "Q" + x + "," + (top + h) + " " + (x + r) + "," + (top + h) + "H" + (x + bw - r) + "Q" + (x + bw) + "," + (top + h) + " " + (x + bw) + "," + (top + h - r) + "V" + top + "Z";
+      bars.push(el("path", { d: path, fill: v >= 0 ? "var(--laden)" : "var(--bad)", "fill-opacity": i === best ? 1 : 0.72 }, svg));
     });
-    el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: y(0), y2: y(0) }, svg);
+    [1, 15, daysIn].forEach((d, k) => el("text", { x: m.l + slot * (d - 0.5), y: H - 6, "text-anchor": k === 0 ? "start" : k === 2 ? "end" : "middle" }, svg).textContent = d + " " + dShort.format(new Date(yy, mm - 1, d)).split(" ")[1]);
+
+    const describe = (i) => {
+      const c = calc[i], e = c.e;
+      return dShort.format(parseIso(e.date)) + " · " + n1.format(e.kwh) + " kWh · laden " + eur.format(c.chargeCost) + " · " + (vals[i] >= 0 ? "bespaard " : "duurder ") + signed(vals[i]);
+    };
+    const defaultText = "Beste dag: " + describe(best);
+    detail.textContent = defaultText;
+    calc.forEach((c, i) => {
+      const d = +c.e.date.slice(8, 10);
+      const hit = el("rect", { class: "hit", x: m.l + slot * (d - 1), y: m.t, width: slot, height: H - m.t - m.b }, svg);
+      const show = () => { detail.textContent = describe(i); bars.forEach((b, j) => b.setAttribute("fill-opacity", j === i ? 1 : 0.45)); };
+      hit.addEventListener("pointerenter", show);
+      hit.addEventListener("click", show);
+      hit.addEventListener("pointerleave", () => { detail.textContent = defaultText; bars.forEach((b, j) => b.setAttribute("fill-opacity", j === best ? 1 : 0.72)); });
+    });
   }
 
-  function drawCum(calc) {
-    const box = $("chartCum"), host = box.querySelector(".svg-host");
-    host.innerHTML = "";
-    const W = Math.max(300, host.clientWidth || 480), H = 240, m = { l: 44, r: 64, t: 10, b: 26 };
-    const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Opgebouwde besparing t.o.v. Euro95 en Euro98" }, host);
-    let a = 0, b = 0;
-    const pts = calc.map(c => { a += c.save95; b += c.save98; return { c, s95: a, s98: b }; });
-    const vals = pts.flatMap(p => [p.s95, p.s98]).concat([0]);
-    let lo = Math.min(...vals), hi = Math.max(...vals);
-    hi = hi > 0 ? niceMax(hi) : 0; lo = lo < 0 ? -niceMax(-lo) : 0;
-    if (hi === lo) hi = 1;
-    const y = (v) => m.t + (H - m.t - m.b) * (hi - v) / (hi - lo);
-    const n = Math.max(1, pts.length - 1);
-    const x = (i) => m.l + (W - m.l - m.r) * (pts.length === 1 ? 0.5 : i / n);
-    const g = el("g", { class: "grid" }, svg);
-    const tk = tickCount(hi - lo);
-    for (let i = 0; i <= tk; i++) {
-      const v = lo + (hi - lo) * i / tk;
-      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }, g);
-      el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg).textContent = "€" + n0.format(v);
-    }
-    el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: y(0), y2: y(0) }, svg);
-    [["s95", "var(--s-e95)"], ["s98", "var(--s-e98)"]].forEach(([k, col]) => {
-      if (!pts.length) return;
-      const d = pts.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(p[k]).toFixed(1)).join("");
-      el("path", { d: d + "L" + x(pts.length - 1) + "," + y(0) + "L" + x(0) + "," + y(0) + "Z", fill: col, "fill-opacity": 0.08 }, svg);
-      el("path", { d, fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
-      const last = pts[pts.length - 1];
-      el("circle", { cx: x(pts.length - 1), cy: y(last[k]), r: 4, fill: col, stroke: "var(--surface)", "stroke-width": 2 }, svg);
-    });
-    if (pts.length) {
-      const last = pts[pts.length - 1];
-      let y95 = y(last.s95) + 4, y98 = y(last.s98) + 4;
-      if (Math.abs(y95 - y98) < 13) { if (y95 <= y98) { y95 -= 7; y98 += 7; } else { y95 += 7; y98 -= 7; } }
-      el("text", { x: x(pts.length - 1) + 8, y: y95, style: "fill:var(--fg)" }, svg).textContent = signed(last.s95);
-      el("text", { x: x(pts.length - 1) + 8, y: y98, style: "fill:var(--fg)" }, svg).textContent = signed(last.s98);
-      el("text", { x: x(0), y: H - 8, "text-anchor": "start" }, svg).textContent = dShort.format(parseIso(pts[0].c.e.date));
-      if (pts.length > 1) el("text", { x: x(pts.length - 1), y: H - 8, "text-anchor": "end" }, svg).textContent = dShort.format(parseIso(last.c.e.date));
-    }
-    const cross = el("line", { x1: 0, x2: 0, y1: m.t, y2: H - m.b, stroke: "var(--fg-3)", "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
-    const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
-    hit.addEventListener("mousemove", (ev) => {
-      if (!pts.length) return;
-      const r = svg.getBoundingClientRect(), sc = r.width / W;
-      const px = (ev.clientX - r.left) / sc;
-      const i = Math.max(0, Math.min(pts.length - 1, Math.round((px - m.l) / ((W - m.l - m.r) / n))));
-      const p = pts[i];
-      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
-      showTip(box, x(i) * sc, host.offsetTop + y(Math.max(p.s95, p.s98)) * sc,
-        "<b>t/m " + dShort.format(parseIso(p.c.e.date)) + "</b>" + tipRow("var(--s-e95)", "vs E95", signed(p.s95)) + tipRow("var(--s-e98)", "vs E98", signed(p.s98)));
-    });
-    hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(box); });
+  // ---------- Sessies ----------
+  function renderSessions() {
+    const calc = entries().map(e => Object.assign({ e }, dayCalc(e))).reverse();
+    const byMonth = {};
+    calc.forEach(c => { (byMonth[monthKey(c.e.date)] = byMonth[monthKey(c.e.date)] || []).push(c); });
+    $("sessionList").innerHTML = Object.keys(byMonth).sort().reverse().map(k => {
+      const list = byMonth[k];
+      const [y, m] = k.split("-").map(Number);
+      const sum = list.reduce((a, c) => a + (is98() ? c.save98 : c.save95), 0);
+      return '<div class="month-label"><span>' + mName.format(new Date(y, m - 1, 1)).toUpperCase() + " " + y + '</span><span class="num">' + signed(sum) + '</span></div>' +
+        '<div class="g list">' + list.map(c => {
+          const e = c.e, d = parseIso(e.date), v = is98() ? c.save98 : c.save95;
+          // Straat als titel, plaats in de regel eronder: "Leidsevaart" / "Haarlem · 8,3 kWh · …"
+          const places = e.places || [];
+          const title = places.length ? places.map(pl => pl.split(", ")[0]).join(" · ") : (e.source === "anwb" ? "ANWB-laadpas" : (e.who || "Handmatig"));
+          const cities = Array.from(new Set(places.map(pl => pl.split(", ")[1]).filter(Boolean))).join(", ");
+          const meta = [cities || null, n1.format(e.kwh) + " kWh", e.kwh ? eur3.format(c.chargeCost / e.kwh).replace(/\s/g, "") + "/kWh" : null,
+            e.km != null ? n0.format(e.km) + " km" : "±" + n0.format(c.km) + " km", e.sessions > 1 ? e.sessions + " sessies" : null].filter(Boolean).join(" · ");
+          return '<div class="item' + (e.example ? " is-example" : "") + '">' +
+            '<div class="day"><b class="num">' + d.getDate() + '</b><span>' + dDow.format(d) + '</span></div>' +
+            '<div class="info"><b>' + esc(title) + '</b><span class="num">' + meta + '</span></div>' +
+            '<div class="amt"><b class="num ' + (v >= 0 ? "good" : "bad") + '">' + signed(v) + '</b><span class="num">' + eur.format(c.chargeCost) + '</span></div>' +
+            (e.example ? "" : '<button type="button" class="del" data-del="' + esc(e.id) + '" aria-label="Verwijder ' + dShort.format(d) + '">' + ICON_DEL + '</button>') +
+            '</div>';
+        }).join("") + '</div>';
+    }).join("");
+  }
+
+  function renderAll(resetForm) {
+    const ex = !log.length;
+    $$("[data-example]").forEach(n => { n.hidden = !ex; });
+    renderToday(); renderMonth(); renderSessions();
+    if (resetForm) fillEntryDefaults();
+  }
+
+  // ---------- Navigatie (tabs via #hash) ----------
+  const VIEWS = ["vandaag", "maand", "sessies", "instellingen"];
+  function route() {
+    const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "vandaag";
+    VIEWS.forEach(n => { $("view-" + n).hidden = n !== v; });
+    $$("[data-tab]").forEach(a => { if (a.dataset.tab === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    if (v === "maand") renderMonth(); // grafiekbreedte hangt af van de zichtbare kaart
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", route);
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
   }
 
   // ---------- Formulieren ----------
@@ -632,29 +756,45 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     $("sKwh").value = S.kwh; $("sStart").value = S.start; $("sElec").value = S.elec; $("sFuel").value = S.fuel;
     $("sBatt").value = S.batt; $("sKmDay").value = S.kmDay;
   }
-  const num = (id) => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+  const num = (id) => { const v = parseFloat(String($(id).value).replace(",", ".")); return isNaN(v) ? null : v; };
+
+  function setAddOpen(open) {
+    $("addCard").hidden = !open;
+    $("btnAdd").setAttribute("aria-expanded", String(open));
+    if (open) $("fKm").focus();
+  }
+  $("btnAdd").addEventListener("click", () => setAddOpen($("addCard").hidden));
+  $("btnAddCancel").addEventListener("click", () => setAddOpen(false));
 
   $("entryForm").addEventListener("submit", (ev) => {
     ev.preventDefault();
     const date = $("fDate").value, km = num("fKm") || 0;
+    if (!date) return;
     const fromInvoice = log.find(x => x.date === date && x.source === "anwb");
     if (fromInvoice && $("fKwh").value === "") {
       fromInvoice.km = km; fromInvoice.who = $("fWho").value;
-      saveL(); $("fKm").value = ""; renderLog();
-      return;
+    } else {
+      const e = { id: Date.now().toString(36), date, km, kwh: num("fKwh") || 0, tarief: num("fTarief") || 0, start: num("fStart") || 0, p95: num("f95") || S.p95, p98: num("f98") || p98Now(), who: $("fWho").value };
+      log = log.filter(x => !(x.date === e.date && x.who === e.who && x.source !== "anwb"));
+      log.push(e);
     }
-    const e = { id: Date.now().toString(36), date, km, kwh: num("fKwh") || 0, tarief: num("fTarief") || 0, start: num("fStart") || 0, p95: num("f95") || S.p95, p98: num("f98") || p98Now(), who: $("fWho").value };
-    if (!e.date) return;
-    log = log.filter(x => !(x.date === e.date && x.who === e.who));
-    log.push(e); saveL();
+    saveL();
     $("fKm").value = ""; $("fKwh").value = "";
-    renderLog();
+    setAddOpen(false);
+    viewMonth = monthKey(date);
+    renderAll(false);
+    toast("Dag opgeslagen: " + dShort.format(parseIso(date)));
   });
-  $("tbody").addEventListener("click", (ev) => {
-    const id = ev.target.getAttribute && ev.target.getAttribute("data-del");
-    if (!id) return;
-    log = log.filter(x => x.id !== id); saveL(); renderLog();
+  $("sessionList").addEventListener("click", (ev) => {
+    const btn = ev.target.closest("[data-del]");
+    if (!btn) return;
+    log = log.filter(x => x.id !== btn.dataset.del); saveL(); renderAll(false);
   });
+
+  $$("[data-cmp]").forEach(b => b.addEventListener("click", () => { S.cmp = b.dataset.cmp; saveS(); renderAll(false); }));
+  $("kmToday").addEventListener("input", (ev) => { kmToday = +ev.target.value; renderToday(); });
+  $("prevMonth").addEventListener("click", () => { const ms = months(); viewMonth = ms[Math.max(0, ms.indexOf(viewMonth) - 1)]; renderMonth(); });
+  $("nextMonth").addEventListener("click", () => { const ms = months(); viewMonth = ms[Math.min(ms.length - 1, ms.indexOf(viewMonth) + 1)]; renderMonth(); });
 
   const settingMap = { sP95: "p95", sP98: "p98", s98Premium: "premium98", sKwh: "kwh", sStart: "start", sElec: "elec", sFuel: "fuel", sBatt: "batt", sKmDay: "kmDay" };
   Object.keys(settingMap).forEach(id => $(id).addEventListener("input", () => {
@@ -662,14 +802,13 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     if (k === "p98") S.p98 = v && v > 0 ? v : null;
     else if (v != null && (v > 0 || k === "start" || k === "premium98")) S[k] = v;
     if (k === "p95") { S.p95Date = null; S.p95Source = "handmatig"; }
-    if (k === "kmDay") kmToday = S.kmDay;
+    if (k === "kmDay") kmToday = Math.max(5, Math.min(200, Math.round(S.kmDay / 5) * 5));
     saveS(); renderAll(false);
   }));
-  $("kmToday").addEventListener("input", (ev) => { kmToday = +ev.target.value; renderToday(); });
-  $("btnReset").addEventListener("click", () => { S = Object.assign({}, DEFAULTS); kmToday = S.kmDay; saveS(); fillSettings(); renderAll(true); });
+  $("btnReset").addEventListener("click", () => { const cmp = S.cmp; S = Object.assign({}, DEFAULTS, { cmp }); kmToday = S.kmDay; saveS(); fillSettings(); renderAll(true); toast("Standaardwaarden teruggezet"); });
   $("btnClear").addEventListener("click", () => { $("clearConfirm").hidden = false; });
   $("btnClearNo").addEventListener("click", () => { $("clearConfirm").hidden = true; });
-  $("btnClearYes").addEventListener("click", () => { log = []; saveL(); $("clearConfirm").hidden = true; renderLog(); });
+  $("btnClearYes").addEventListener("click", () => { log = []; delete S.lastImport; saveL(); saveS(); $("clearConfirm").hidden = true; renderImportStatus(); renderAll(false); toast("Logboek gewist"); });
 
   // ---------- CBS: landelijke gemiddelde pompprijs Euro95 ----------
   // Dagprijzen Euro95, nieuwste eerst: [{ date: "2026-09-29", p95: 2.041 }, ...]
@@ -741,18 +880,30 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
 
   const nlNum = (s) => parseFloat(String(s).replace(/\./g, "").replace(",", "."));
 
-  // Factuurspecificatie ANWB: per sessie een regel "29-09-2026 16:30:18 | kWh: 8,28 | Duur: ..."
-  // gevolgd door "Subtotalen: Energie: EUR 2,42 | Toeslagen: EUR 0,25 | Vast: EUR 0,74" (excl. btw).
+  // "ALF-0070152: Leidsevaart 394 2014 HM Haarlem, NLD" -> "Leidsevaart, Haarlem"
+  function shortPlace(raw) {
+    let s = raw.replace(/^\d+\s+/, "").trim();
+    if (s.includes(": ")) s = s.slice(s.lastIndexOf(": ") + 2);
+    s = s.replace(/^:\s*/, "").replace(/,\s*NLD\s*$/i, "").trim();
+    const m = s.match(/^(.+?)\s+\d+\S*\s.*?\b\d{4}\s?[A-Z]{2}\s+(.+)$/);
+    if (m) return m[1].trim() + ", " + m[2].trim();
+    return s.length > 40 ? s.slice(0, 39) + "…" : s;
+  }
+
+  // Factuurspecificatie ANWB: per sessie een locatie, een regel "… | Token: …",
+  // de regel "29-09-2026 16:30:18 | kWh: 8,28 | Duur: ..." en daarna
+  // "Subtotalen: Energie: EUR 2,42 | Toeslagen: EUR 0,25 | Vast: EUR 0,74" (excl. btw).
   // De prijs-kolom staat soms vóór de datumregel (bij een paginawissel), dus we rekenen met de subtotalen.
   function parseAnwb(text) {
     const btwM = text.match(/Btw\s+([\d.,]+)\s*%/i);
     const btw = btwM ? nlNum(btwM[1]) / 100 : 0.21;
     const sessions = [];
-    let cur = null;
+    let cur = null, locBuf = [], place = null;
     for (const raw of text.split("\n")) {
       const l = raw.trim();
+      if (!l) continue;
       const m = l.match(/(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})(?::\d{2})?\s*\|\s*kWh:\s*([\d.,]+)/i);
-      if (m) { cur = { date: m[3] + "-" + m[2] + "-" + m[1], time: m[4], kwh: nlNum(m[5]), excl: null }; sessions.push(cur); continue; }
+      if (m) { cur = { date: m[3] + "-" + m[2] + "-" + m[1], time: m[4], kwh: nlNum(m[5]), excl: null, place }; sessions.push(cur); continue; }
       const sm = l.match(/^Subtotalen:\s*(.*)$/i);
       if (sm && cur && cur.excl == null) {
         cur.excl = sm[1].split("|").reduce((sum, part) => {
@@ -760,6 +911,10 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
           return sum + (e ? nlNum(e[1]) : 0);
         }, 0);
       }
+      if (/\|\s*Token:/i.test(l)) { place = locBuf.length ? shortPlace(locBuf.join(" ")) : null; locBuf = []; continue; }
+      if (/^(Subtotalen|Toeslagen|Laadpaal|EUR\s|Positie|btw|Prijs|Factuur|Specificatie|Totaal)/i.test(l) || /^\d+$/.test(l)) { locBuf = []; continue; }
+      locBuf.push(l);
+      if (locBuf.length > 3) locBuf.shift();
     }
     const tE = text.match(/Totaal\s*\(excl\.?\s*btw\)\s*EUR\s*([\d.,]+)/i);
     const tI = text.match(/Totaal\s*\(incl\.?\s*btw\)\s*EUR\s*([\d.,]+)/i);
@@ -774,17 +929,36 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     return hit ? hit.p95 : null;
   }
 
+  function renderImportStatus() {
+    const li = S.lastImport;
+    const icon = $("importIcon");
+    if (!li) {
+      icon.className = "ic info";
+      $("importTitle").textContent = "Nog geen factuur ingelezen";
+      $("importStatus").textContent = "Kies de maandelijkse factuurspecificatie (PDF) uit de mail van ANWB. Het bestand blijft op dit apparaat.";
+      return;
+    }
+    icon.className = "ic " + (li.ok ? "good" : "bad");
+    icon.innerHTML = li.ok ? ICON_OK : ICON_WARN;
+    $("importTitle").textContent = li.title;
+    $("importStatus").textContent = li.text;
+  }
+
   async function importInvoice(file) {
-    const st = $("importStatus");
-    st.className = "status"; st.textContent = "Factuur lezen…";
+    location.hash = "#maand";
+    const icon = $("importIcon");
+    icon.className = "ic info";
+    $("importTitle").textContent = "Factuur lezen…";
+    $("importStatus").textContent = file.name;
     try {
       const inv = parseAnwb(await pdfText(file));
       if (!inv.sessions.length) throw new Error("geen laadsessies gevonden. Is dit de factuurspecificatie van ANWB?");
 
       const days = {};
       for (const x of inv.sessions) {
-        const d = days[x.date] || (days[x.date] = { kwh: 0, cost: 0, n: 0 });
+        const d = days[x.date] || (days[x.date] = { kwh: 0, cost: 0, n: 0, places: [] });
         d.kwh += x.kwh; d.cost += x.excl * (1 + inv.btw); d.n++;
+        if (x.place && !d.places.includes(x.place)) d.places.push(x.place);
       }
       let series = null;
       try { series = await cbsSeries(400); } catch (e) { /* CBS niet bereikbaar: huidige prijs */ }
@@ -799,7 +973,7 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
         if (p95) usedCbs++;
         log = log.filter(x => x.date !== date);
         log.push({
-          id: "anwb-" + date, date, source: "anwb", sessions: d.n,
+          id: "anwb-" + date, date, source: "anwb", sessions: d.n, places: d.places,
           km: prev && prev.km != null ? prev.km : (manualKm || null),
           who: prev ? prev.who : (same[0] && same[0].who) || "",
           kwh: +d.kwh.toFixed(2), cost: d.cost, tarief: d.cost / d.kwh, start: 0,
@@ -811,25 +985,30 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
       const kwhTot = inv.sessions.reduce((a, x) => a + x.kwh, 0);
       const exclTot = inv.sessions.reduce((a, x) => a + x.excl, 0);
       const inclTot = exclTot * (1 + inv.btw);
-      S.kwh = +(inclTot / kwhTot).toFixed(3); S.start = 0;
-      saveS(); fillSettings(); renderAll(true);
-
       const dates = Object.keys(days).sort();
       const matches = inv.totExcl == null || Math.abs(inv.totExcl - exclTot) < 0.02;
-      st.className = "status " + (matches && !inv.missing ? "good" : "bad");
-      st.textContent = inv.sessions.length + " laadsessies op " + dates.length + " dagen ingelezen (" +
-        dShort.format(parseIso(dates[0])) + " – " + dShort.format(parseIso(dates[dates.length - 1])) + "): " +
-        n1.format(kwhTot) + " kWh voor " + eur.format(inclTot) + " incl. btw" +
-        (matches ? (inv.totExcl != null ? ", gelijk aan het factuurtotaal." : ".") : ". Let op: het factuurtotaal is " + eur.format(inv.totIncl || inv.totExcl) + ", controleer de sessies.") +
-        (inv.missing ? " " + inv.missing + " sessie(s) zonder bedrag overgeslagen." : "") +
-        " Laadtarief bij Vandaag: " + eur3.format(S.kwh) + "/kWh (gemiddelde van deze factuur)." +
-        (usedCbs === dates.length ? " Benzineprijzen: CBS-dagprijzen." : " Benzineprijzen: CBS-dagprijs niet beschikbaar, huidige prijs gebruikt.");
+      S.kwh = +(inclTot / kwhTot).toFixed(3); S.start = 0;
+      const [fy, fm] = dates[0].split("-").map(Number);
+      S.lastImport = {
+        ok: matches && !inv.missing,
+        title: "Factuur " + mName.format(new Date(fy, fm - 1, 1)) + " ingelezen",
+        text: inv.sessions.length + " sessies op " + dates.length + " dagen · " + n1.format(kwhTot) + " kWh · " + eur.format(inclTot) + " incl. btw" +
+          (matches ? (inv.totExcl != null ? " · klopt met factuurtotaal" : "") : " · let op: factuurtotaal is " + eur.format(inv.totIncl || inv.totExcl)) +
+          (inv.missing ? " · " + inv.missing + " sessie(s) zonder bedrag overgeslagen" : "") +
+          (usedCbs === dates.length ? " · CBS-dagprijzen" : " · benzineprijs: huidige prijs (CBS niet bereikbaar)")
+      };
+      saveS(); fillSettings();
+      viewMonth = monthKey(dates[dates.length - 1]);
+      renderAll(true);
+      renderImportStatus();
+      toast("Laadtarief bijgewerkt naar " + eur3.format(S.kwh) + "/kWh (gemiddelde van de factuur)");
     } catch (err) {
-      st.className = "status bad";
-      st.textContent = "Inlezen lukte niet: " + err.message;
+      icon.className = "ic bad"; icon.innerHTML = ICON_WARN;
+      $("importTitle").textContent = "Inlezen lukte niet";
+      $("importStatus").textContent = err.message;
     }
   }
-  $("btnImport").addEventListener("click", () => $("fileImport").click());
+  $$("[data-import]").forEach(b => b.addEventListener("click", () => $("fileImport").click()));
   $("fileImport").addEventListener("change", (ev) => {
     const f = ev.target.files && ev.target.files[0];
     if (f) importInvoice(f);
@@ -848,6 +1027,8 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
     const t = currentTheme();
     $("themeLight").setAttribute("aria-pressed", String(t === "light"));
     $("themeDark").setAttribute("aria-pressed", String(t === "dark"));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", t === "dark" ? "#0a0f1c" : "#e6ecf5");
   }
   function setTheme(t) {
     root.setAttribute("data-theme", t);
@@ -860,11 +1041,12 @@ footer { font-size: 0.8rem; color: var(--fg-3); display: grid; gap: 6px; max-wid
   syncThemeButtons();
 
   // ---------- Opstart ----------
-  function renderAll(resetForm) { renderToday(); renderLog(); if (resetForm) fillEntryDefaults(); }
   fillSettings();
+  renderImportStatus();
+  route();
   renderAll(true);
   if (S.lastFetch !== iso(new Date())) fetchCBS(false);
-  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(renderLog, 150); });
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(renderMonth, 150); });
 })();
 </script>
 </body>
