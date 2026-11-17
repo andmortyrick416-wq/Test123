@@ -72,6 +72,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+/* Niet display:none: sommige browsers (o.a. oudere iOS Safari) openen dan geen bestandskiezer. */
+.file-input { position: fixed; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 html { background: var(--bg); }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 var(--font); -webkit-font-smoothing: antialiased; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
@@ -264,7 +266,7 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"><i></i><i></i><i></i></div>
-<input type="file" id="fileImport" accept="application/pdf,.pdf" hidden>
+<input type="file" id="fileImport" class="file-input" accept="application/pdf,.pdf" tabindex="-1" aria-hidden="true">
 
 <main class="app">
 
@@ -960,7 +962,11 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
   // ---------- ANWB-factuur (PDF) inlezen ----------
   // pdf.js wordt pas geladen als je een factuur kiest. Het worker-script zet
   // window.pdfjsWorker, zodat pdf.js zonder aparte Web Worker werkt.
-  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  // Eerst de "legacy"-build (werkt ook in oudere Safari-versies), anders de gewone build.
+  const PDFJS_SOURCES = [
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/",
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/"
+  ];
   let pdfReady = null;
   const loadScript = (src) => new Promise((res, rej) => {
     const s = document.createElement("script");
@@ -970,9 +976,14 @@ input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border-radius
   });
   function loadPdfJs() {
     if (!pdfReady) {
-      pdfReady = loadScript(PDFJS + "pdf.min.js")
-        .then(() => loadScript(PDFJS + "pdf.worker.min.js"))
-        .then(() => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; return window.pdfjsLib; });
+      const tryFrom = (i) => {
+        const base = PDFJS_SOURCES[i];
+        return loadScript(base + "pdf.min.js")
+          .then(() => loadScript(base + "pdf.worker.min.js"))
+          .then(() => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + "pdf.worker.min.js"; return window.pdfjsLib; })
+          .catch((err) => { if (i + 1 < PDFJS_SOURCES.length) return tryFrom(i + 1); throw err; });
+      };
+      pdfReady = tryFrom(0);
       pdfReady.catch(() => { pdfReady = null; });
     }
     return pdfReady;
