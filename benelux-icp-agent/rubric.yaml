@@ -1,0 +1,49 @@
+gates:
+  - id: benelux
+    description: Benelux HQ, or a Benelux entity that decides on software
+  - id: hardware_core
+    description: Physical product (hardware, instruments, machines) is the core business
+  - id: not_software_vendor
+    description: Not already a software vendor, no mature SaaS product
+  - id: not_in_other_campaign
+    description: Not an active Mendix account or in another rep's campaign (flag Marco overlap for Industrial Machinery)
+
+criteria:
+  - id: regulated_industry
+    weight: 20
+    zero: Unregulated consumer product
+    full: Strict regime such as MDR or IVDR, or critical infrastructure customers
+  - id: trigger_event
+    weight: 20
+    zero: None found
+    full: Dated trigger in the last 12 months or deadline ahead
+  - id: data_generating_product
+    weight: 20
+    zero: Mechanical, no data
+    full: Connected product with data already collected
+  - id: software_not_core
+    weight: 10
+    zero: Large in-house software org
+    full: Little software capability, relies on partners
+  - id: data_to_service
+    weight: 15
+    zero: No visible angle
+    full: Clear SaaS idea combining product and data
+  - id: digital_intent
+    weight: 10
+    zero: None
+    full: Several recent signals (software, cloud or data job posts, digital strategy, new CTO)
+  - id: reachable_and_sized
+    weight: 5
+    zero: Unclear or too small
+    full: Named CEO or MD, size fits ISV model
+
+# TODO Kevin: set preferred employee range
+size_band:
+  min_employees: null
+  max_employees: null
+
+tiers:
+  A: 70   # review, then CEO-level outreach
+  B: 50   # BDR sequence, light personalization
+  C: 0    # park, recheck on new trigger
